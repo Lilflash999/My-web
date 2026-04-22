@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Admin Panel • SocialNest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+        h1 { color: #1e293b; display: flex; align-items: center; gap: 12px; }
+        .admin-badge { background: #dc2626; color: white; padding: 4px 12px; border-radius: 30px; font-size: 12px; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; }
+        .stats { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat-card { background: rgba(255,255,255,0.95); border-radius: 16px; padding: 20px; flex: 1; min-width: 150px; text-align: center; }
+        .stat-number { font-size: 32px; font-weight: bold; color: #667eea; }
+        .stat-label { color: #64748b; margin-top: 8px; }
+        .tabs { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: rgba(255,255,255,0.8); border: none; padding: 12px 24px; border-radius: 40px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .tab-btn.active { background: #667eea; color: white; }
+        .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .user-card { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; position: relative; transition: 0.2s; }
+        .user-card.banned { background: #fef2f2; border: 2px solid #dc2626; }
+        .user-card.owner-card { border: 2px solid #fbbf24; background: #fffbeb; }
+        .ban-badge { position: absolute; top: 20px; right: 20px; background: #dc2626; color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
+        .owner-badge-tag { position: absolute; top: 20px; right: 20px; background: #fbbf24; color: #1e293b; padding: 4px 10px; border-radius: 20px; font-size: 11px; }
+        .user-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .user-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
+        .user-name { font-size: 18px; font-weight: 700; }
+        .user-username { color: #64748b; font-size: 13px; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 16px; }
+        .ban-btn, .unban-btn, .view-btn { flex: 1; padding: 8px; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; }
+        .ban-btn { background: #dc2626; color: white; }
+        .unban-btn { background: #10b981; color: white; }
+        .view-btn { background: #667eea; color: white; }
+        .reports-list { display: flex; flex-direction: column; gap: 20px; }
+        .report-card { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; border-left: 6px solid #dc2626; }
+        .report-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 12px; }
+        .reported-user { font-weight: 700; font-size: 1.1rem; }
+        .reported-by { color: #64748b; font-size: 13px; }
+        .report-reason { background: #fef2f2; padding: 10px; border-radius: 12px; margin: 12px 0; color: #b91c1c; }
+        .report-details { background: #f8fafc; padding: 12px; border-radius: 12px; margin: 12px 0; }
+        .last-messages { background: #f1f5f9; border-radius: 16px; padding: 12px; margin: 12px 0; }
+        .last-messages-title { font-weight: 600; margin-bottom: 10px; font-size: 14px; }
+        .message-bubble { background: white; border-radius: 12px; padding: 8px 12px; margin-bottom: 8px; }
+        .message-bubble-sent { background: #e0f2fe; border-left: 3px solid #0284c7; }
+        .message-bubble-received { background: #fef9c3; border-left: 3px solid #eab308; }
+        .message-meta { font-size: 11px; color: #475569; margin-bottom: 4px; }
+        .message-text { font-size: 14px; }
+        .report-actions { display: flex; gap: 12px; margin-top: 16px; }
+        .resolve-btn, .ban-from-report-btn { padding: 8px 20px; border: none; border-radius: 30px; cursor: pointer; font-weight: 600; }
+        .resolve-btn { background: #10b981; color: white; }
+        .ban-from-report-btn { background: #dc2626; color: white; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 12px 24px; border-radius: 40px; z-index: 1000; opacity: 0; transition: 0.2s; font-size: 14px; white-space: nowrap; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 99999; flex-direction: column; }
+        .loading-overlay.hide { display: none; }
+        .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .users-grid { grid-template-columns: 1fr; } .stats { flex-direction: column; } .toast { white-space: normal; text-align: center; } }
+    </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-shield-alt"></i> Admin Panel <span class="admin-badge">ADMIN-BASE</span></h1>
+        <button class="logout-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-card"><div class="stat-number" id="totalUsers">-</div><div class="stat-label">Total Users</div></div>
+        <div class="stat-card"><div class="stat-number" id="onlineUsers">-</div><div class="stat-label">Online Now</div></div>
+        <div class="stat-card"><div class="stat-number" id="bannedUsers">-</div><div class="stat-label">Banned Users</div></div>
+        <div class="stat-card"><div class="stat-number" id="totalPosts">-</div><div class="stat-label">Total Posts</div></div>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="users"><i class="fas fa-users"></i> Users</button>
+        <button class="tab-btn" data-tab="reports"><i class="fas fa-flag"></i> Reports</button>
+    </div>
+    
+    <div id="usersTab"><div id="usersGrid" class="users-grid"><div class="loading">Loading users...</div></div></div>
+    <div id="reportsTab" style="display: none;"><div id="reportsList" class="reports-list"><div class="loading">Loading reports...</div></div></div>
+</div>
+
+<div id="toastMsg" class="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    const OWNER_UID = "6JkPCRetiCOX65opu4ofqAiTXaY2";
+    let currentUserId = null;
+    
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        t.style.background = isError ? '#b91c1c' : '#1e293b';
+        setTimeout(() => t.style.opacity = '0', 3000);
+    }
+    
+    function escapeHTML(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+    
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const tab = btn.dataset.tab;
+            document.getElementById('usersTab').style.display = tab === 'users' ? 'block' : 'none';
+            document.getElementById('reportsTab').style.display = tab === 'reports' ? 'block' : 'none';
+            if (tab === 'reports') loadReports();
+        });
+    });
+    
+    // BAN FUNCTION with explicit error toasts
+    async function banUser(userId, username) {
+        console.log("Ban function called for:", userId, username);
+        if (userId === currentUserId) {
+            showToast("❌ You cannot ban yourself!", true);
+            return;
+        }
+        if (userId === OWNER_UID) {
+            showToast("❌ Cannot ban the owner!", true);
+            return;
+        }
+        if (!confirm(`Ban ${username}? They will lose access.`)) return;
+        
+        try {
+            // Update the banned flag and timestamp
+            await update(ref(db, `users/${userId}`), { 
+                banned: true, 
+                bannedAt: new Date().toISOString() 
+            });
+            showToast(`✅ ${username} has been banned successfully`);
+            // Refresh user list
+            loadUsers();
+        } catch (err) {
+            console.error("Ban error details:", err);
+            let errorMsg = err.message || "Unknown error";
+            if (errorMsg.includes("permission_denied")) {
+                errorMsg = "Permission denied: Firebase rules don't allow owner to ban. Update rules as shown in instructions.";
+            }
+            showToast(`❌ Ban failed: ${errorMsg}`, true);
+        }
+    }
+    
+    async function unbanUser(userId, username) {
+        if (!confirm(`Unban ${username}?`)) return;
+        try {
+            await update(ref(db, `users/${userId}`), { banned: false, bannedAt: null });
+            showToast(`✅ ${username} unbanned`);
+            loadUsers();
+        } catch (err) {
+            console.error("Unban error:", err);
+            showToast(`Unban failed: ${err.message}`, true);
+        }
+    }
+    
+    async function loadUsers() {
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        const users = snapshot.val() || {};
+        let onlineCount = 0, bannedCount = 0, totalPosts = 0;
+        const usersArray = [];
+        for (const [id, user] of Object.entries(users)) {
+            if (user.online) onlineCount++;
+            if (user.banned) bannedCount++;
+            totalPosts += user.posts?.length || 0;
+            usersArray.push({
+                uid: id,
+                ...user,
+                online: user.online || false,
+                isBanned: user.banned || false,
+                isOwner: id === OWNER_UID
+            });
+        }
+        document.getElementById('totalUsers').textContent = usersArray.length;
+        document.getElementById('onlineUsers').textContent = onlineCount;
+        document.getElementById('bannedUsers').textContent = bannedCount;
+        document.getElementById('totalPosts').textContent = totalPosts;
+        
+        const container = document.getElementById('usersGrid');
+        container.innerHTML = usersArray.map(user => `
+            <div class="user-card ${user.isBanned ? 'banned' : ''} ${user.isOwner ? 'owner-card' : ''}">
+                ${user.isBanned ? '<div class="ban-badge"><i class="fas fa-ban"></i> BANNED</div>' : ''}
+                ${user.isOwner && !user.isBanned ? '<div class="owner-badge-tag"><i class="fas fa-crown"></i> OWNER</div>' : ''}
+                <div class="user-header">
+                    <img class="user-avatar" src="${user.profilePic || 'https://ui-avatars.com/api/?background=667eea&color=fff'}">
+                    <div>
+                        <div class="user-name">${escapeHTML(user.fullName || user.displayName)} ${user.uid === currentUserId ? '<span style="background:#667eea; color:white; padding:2px 8px; border-radius:20px; font-size:10px;">You</span>' : ''}</div>
+                        <div class="user-username">@${escapeHTML(user.username)}</div>
+                        <div>${user.online ? '🟢 Online' : '⚫ Offline'}</div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    ${!user.isOwner && user.uid !== currentUserId ? 
+                        (user.isBanned ? 
+                            `<button class="unban-btn" data-uid="${user.uid}" data-name="${escapeHTML(user.username)}">Unban</button>` : 
+                            `<button class="ban-btn" data-uid="${user.uid}" data-name="${escapeHTML(user.username)}">Ban</button>`
+                        ) : ''}
+                    ${user.uid === currentUserId ? '<button class="ban-btn" disabled style="opacity:0.5;">Self</button>' : ''}
+                    ${user.isOwner && user.uid !== currentUserId ? '<button class="ban-btn" disabled style="opacity:0.5;">Owner</button>' : ''}
+                    <button class="view-btn" data-uid="${user.uid}">View</button>
+                </div>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll('.ban-btn').forEach(btn => btn.addEventListener('click', () => banUser(btn.dataset.uid, btn.dataset.name)));
+        document.querySelectorAll('.unban-btn').forEach(btn => btn.addEventListener('click', () => unbanUser(btn.dataset.uid, btn.dataset.name)));
+        document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', () => window.location.href = `view-profile.html?uid=${btn.dataset.uid}`));
+    }
+    
+    async function loadReports() {
+        const reportsRef = ref(db, 'reports');
+        const snapshot = await get(reportsRef);
+        const reports = snapshot.val();
+        const container = document.getElementById('reportsList');
+        if (!reports || Object.keys(reports).length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:40px; background:white; border-radius:20px;">No reports yet</div>';
+            return;
+        }
+        const reportsArray = Object.entries(reports).map(([id, r]) => ({ id, ...r }));
+        reportsArray.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        container.innerHTML = reportsArray.map(report => {
+            let messagesHtml = '';
+            if (report.lastMessages?.length) {
+                messagesHtml = `
+                    <div class="last-messages">
+                        <div class="last-messages-title"><i class="fas fa-comment-dots"></i> Last ${report.lastMessages.length} messages:</div>
+                        ${report.lastMessages.map(msg => `
+                            <div class="message-bubble ${msg.from === 'me' ? 'message-bubble-sent' : 'message-bubble-received'}">
+                                <div class="message-meta">${escapeHTML(msg.from)} • ${escapeHTML(msg.time)}</div>
+                                <div class="message-text">${escapeHTML(msg.text) || '📎 Media'}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                messagesHtml = `<div class="last-messages"><div class="last-messages-title">⚠️ No message history</div></div>`;
+            }
+            return `
+                <div class="report-card" data-report-id="${report.id}">
+                    <div class="report-header">
+                        <div class="reported-user"><i class="fas fa-user-slash"></i> Reported: ${escapeHTML(report.reportedUserName)}</div>
+                        <div class="reported-by">By: ${escapeHTML(report.reportedByUserName)}</div>
+                    </div>
+                    <div class="report-reason"><strong>Reason:</strong> ${escapeHTML(report.reason)}</div>
+                    ${report.details ? `<div class="report-details"><strong>Details:</strong> ${escapeHTML(report.details)}</div>` : ''}
+                    ${messagesHtml}
+                    <div class="report-actions">
+                        <button class="resolve-btn" data-id="${report.id}"><i class="fas fa-check"></i> Resolve</button>
+                        <button class="ban-from-report-btn" data-user="${report.reportedUserId}" data-name="${escapeHTML(report.reportedUserName)}"><i class="fas fa-ban"></i> Ban User</button>
+                    </div>
+                    <div style="font-size: 11px; color: #8a99b4; margin-top: 12px;">${new Date(report.createdAt).toLocaleString()}</div>
+                </div>
+            `;
+        }).join('');
+        
+        document.querySelectorAll('.resolve-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                await update(ref(db, `reports/${btn.dataset.id}`), { status: 'resolved', resolvedAt: new Date().toISOString() });
+                showToast("Report resolved");
+                loadReports();
+            });
+        });
+        
+        document.querySelectorAll('.ban-from-report-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const userId = btn.dataset.user;
+                const userName = btn.dataset.name;
+                if (userId === OWNER_UID) { showToast("Cannot ban owner", true); return; }
+                if (confirm(`Ban ${userName}?`)) {
+                    try {
+                        await update(ref(db, `users/${userId}`), { banned: true, bannedAt: new Date().toISOString() });
+                        const reportCard = btn.closest('.report-card');
+                        const reportId = reportCard.dataset.reportId;
+                        if (reportId) await update(ref(db, `reports/${reportId}`), { status: 'resolved', bannedViaReport: true });
+                        showToast(`${userName} banned`);
+                        loadUsers();
+                        loadReports();
+                    } catch (err) {
+                        showToast(`Ban failed: ${err.message}`, true);
+                    }
+                }
+            });
+        });
+    }
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) { window.location.href = 'login.html'; return; }
+        currentUserId = user.uid;
+        console.log("Logged in UID:", currentUserId);
+        console.log("Owner UID:", OWNER_UID);
+        if (currentUserId !== OWNER_UID) {
+            showToast("⚠️ Access Denied! Admin only.", true);
+            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+            return;
+        }
+        await loadUsers();
+        await loadReports();
+        document.getElementById('loadingOverlay').classList.add('hide');
+    });
+    
+    setTimeout(() => {
+        const loader = document.getElementById('loadingOverlay');
+        if (loader) loader.classList.add('hide');
+    }, 2000);
+</script>
+</body>
+</html>

@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SocialNest • Connect with the World</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: rgb(22, 22, 22, 4);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background circles */
+        .bg-circle {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .circle1 {
+            width: 300px;
+            height: 300px;
+            top: -100px;
+            right: -100px;
+        }
+
+        .circle2 {
+            width: 500px;
+            height: 500px;
+            bottom: -200px;
+            left: -200px;
+        }
+
+        .circle3 {
+            width: 200px;
+            height: 200px;
+            top: 40%;
+            right: 10%;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: #667eea;
+            font-size: 2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .nav-login {
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .nav-login:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-signup {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+
+        .nav-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Main content */
+        .main-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 2rem 2rem;
+        }
+
+        .hero-section {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-left {
+            color: white;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-title span {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            padding: 1rem 2rem;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+        }
+
+        .cta-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .cta-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* Hero right - Features card */
+        .hero-right {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .features-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-item:hover {
+            background: #f0f2f5;
+            transform: translateX(5px);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .feature-text h4 {
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-text p {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            z-index: 1;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .social-icons a {
+            color: white;
+            font-size: 1.5rem;
+            opacity: 0.8;
+            transition: all 0.3s;
+        }
+
+        .social-icons a:hover {
+            opacity: 1;
+            transform: translateY(-3px);
+        }
+
+        .copyright {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+            
+            .logo {
+                font-size: 1.3rem;
+            }
+            
+            .logo i {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .hero-section {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-description {
+                font-size: 1rem;
+            }
+            
+            .hero-stats {
+                gap: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem;
+            }
+            
+            .cta-btn {
+                padding: 0.75rem 1.5rem;
+            }
+            
+            .hero-right {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.8rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+            
+            .cta-btn {
+                justify-content: center;
+            }
+        }
+
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Modal for demo */
+        .modal-demo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-demo-content {
+            background: white;
+            border-radius: 2rem;
+            padding: 2rem;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-demo-content i {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .modal-demo-content h3 {
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .modal-demo-content p {
+            color: #64748b;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-demo-content button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-circle circle1"></div>
+<div class="bg-circle circle2"></div>
+<div class="bg-circle circle3"></div>
+
+<!-- Navigation Bar -->
+<nav class="navbar">
+    <div class="logo">
+        <i class="fas fa-users"></i>
+        <span>SocialNest</span>
+    </div>
+    <div class="nav-links">
+        <a href="login.html" class="nav-btn nav-login" id="loginNavBtn">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+        <a href="signup.html" class="nav-btn nav-signup" id="signupNavBtn">
+            <i class="fas fa-user-plus"></i> Sign Up
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-container">
+    <div class="hero-section">
+        <div class="hero-left">
+            <div class="hero-badge">
+                <i class="fas fa-fire"></i> Trending Now • #1 Social Platform
+            </div>
+            <h1 class="hero-title">
+                Connect, Share, and Grow with <span>SocialNest</span>
+            </h1>
+            <p class="hero-description">
+                Join other users worldwide who are already building meaningful connections, 
+                sharing their stories, and discovering new opportunities every day.
+            </p>
+            <div class="cta-buttons">
+                <a href="signup.html" class="cta-btn cta-primary">
+                    <i class="fas fa-user-plus"></i> Get Started Free
+                </a>
+                <a href="#" class="cta-btn cta-secondary" id="learnMoreBtn">
+                    <i class="fas fa-play"></i> Learn More
+                </a>
+            </div>
+        </div>
+        <div class="hero-right floating">
+            <div class="features-title">
+                <i class="fas fa-star" style="color: #fbbf24;"></i> Why Choose SocialNest?
+            </div>
+            <div class="feature-list">
+                <div class="feature-item" onclick="showFeatureDemo('Connect with Friends')">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h4>Connect Instantly</h4>
+                        <p>Find and connect with friends, family, and like-minded people</p>
+                    </div>
+                </div>
+                <div class="feature-item" onclick="showFeatureDemo('Share Your Story')">
+                    <div class="feature-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h4>Share Your Moments</h4>
+                        <p>Post photos, videos, and updates with your network</p>
+                    </div>
+                </div>
+                <div class="feature-item" onclick="showFeatureDemo('Secure & Private')">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h4>Secure & Private</h4>
+                        <p>Your data is safe with advanced encryption and privacy controls</p>
+                    </div>
+                </div>
+                <div class="feature-item" onclick="showFeatureDemo('Real-time Chat')">
+                    <div class="feature-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div class="feature-text">
+                        <h4>Real-time Messaging</h4>
+                        <p>Chat instantly with friends</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-links">
+            <a href="#">About Us</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Help Center</a>
+            <a href="#">Contact Us</a>
+        </div>
+        <div class="social-icons">
+            <a href="https://wa.me/2349073807896/hello"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://x.com/ObinnaEzezi"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/in/obinna-eze-79a02a403"><i class="fab fa-linkedin"></i></a>
+            <a href="https://youtube.com/@obinnaeze5883"><i class="fab fa-youtube"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; 2024 SocialNest. All rights reserved. | Building connections worldwide 🌍
+        </div>
+    </div>
+</footer>
+
+<!-- Demo Modal -->
+<div id="demoModal" class="modal-demo">
+    <div class="modal-demo-content">
+        <i class="fas fa-rocket"></i>
+        <h3 id="modalTitle">Feature Coming Soon!</h3>
+        <p id="modalMessage">This feature will be available after you create an account. Join SocialNest today to experience all the amazing features!</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button onclick="closeModal()">Close</button>
+            <button onclick="redirectToSignup()" style="background: #667eea;">Sign Up Now</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show feature demo modal
+    function showFeatureDemo(featureName) {
+        const modal = document.getElementById('demoModal');
+        const title = document.getElementById('modalTitle');
+        const message = document.getElementById('modalMessage');
+        
+        title.textContent = featureName;
+        message.textContent = `✨ "${featureName}" is an amazing social media platform of Obinna Eze! Create an account to unlock this and many more exciting features.`;
+        
+        modal.style.display = 'flex';
+    }
+    
+    function closeModal() {
+        const modal = document.getElementById('demoModal');
+        modal.style.display = 'none';
+    }
+    
+    function redirectToSignup() {
+        window.location.href = 'signup.html';
+    }
+    
+    // Learn More button
+    document.getElementById('learnMoreBtn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        showFeatureDemo('Explore SocialNest');
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(e) {
+        const modal = document.getElementById('demoModal');
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.feature-item, .hero-left').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease';
+        observer.observe(el);
+    });
+    
+    // Trigger initial animations
+    setTimeout(() => {
+        document.querySelectorAll('.feature-item, .hero-left').forEach(el => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        });
+    }, 100);
+    
+    // Check if login.html and signup.html exist, if not, create placeholder alert
+    console.log('SocialNest Landing Page Loaded');
+    console.log('Navigate to login.html or signup.html to continue');
+    
+    // Add smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+    
+    // Dynamic background effect
+    let mouseX = 0, mouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX / window.innerWidth;
+        mouseY = e.clientY / window.innerHeight;
+        
+        const circles = document.querySelectorAll('.bg-circle');
+        circles.forEach((circle, index) => {
+            const speed = (index + 1) * 20;
+            const x = (mouseX * speed);
+            const y = (mouseY * speed);
+            circle.style.transform = `translate(${x}px, ${y}px)`;
+        });
+    });
+</script>
+
+
+
+<!-- Navigation links that actually work -->
+<script>
+    // Ensure the login and signup buttons actually navigate
+    document.querySelectorAll('#loginNavBtn, .nav-login').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = 'login.html';
+        });
+    });
+    
+    document.querySelectorAll('#signupNavBtn, .nav-signup, .cta-primary').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const href = btn.getAttribute('href');
+            if (href && href !== '#') {
+                // Allow default behavior if href is set
+                return;
+            }
+            e.preventDefault();
+            window.location.href = 'signup.html';
+        });
+    });
+</script>
+
+</body>
+</html>

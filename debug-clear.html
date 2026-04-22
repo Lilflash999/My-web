@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Debug Tool • Clear User Data</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .warning {
+            background: #fef2f2;
+            border-left: 4px solid #dc2626;
+            padding: 16px;
+            border-radius: 16px;
+            margin: 20px 0;
+            color: #991b1b;
+        }
+        .input-group {
+            margin: 16px 0;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e293b;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 14px;
+        }
+        button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+            font-size: 16px;
+        }
+        button.secondary {
+            background: #10b981;
+        }
+        button.warning {
+            background: #ea580c;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 1000;
+            opacity: 0;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>🔧 Debug Tool</h1>
+        <p style="color: #64748b;">Clear user data for testing</p>
+        
+        <div class="warning">
+            ⚠️ <strong>WARNING:</strong> This action is <strong>IRREVERSIBLE</strong>. 
+            All selected user data will be permanently deleted.
+        </div>
+        
+        <div class="input-group">
+            <label>👤 User ID to clear:</label>
+            <input type="text" id="userId" placeholder="Enter Firebase User ID" value="">
+        </div>
+        
+        <div class="input-group">
+            <label>🗑️ What to clear:</label>
+            <select id="clearType">
+                <option value="all">🔥 ALL DATA (chats, friends, posts, requests)</option>
+                <option value="chats">💬 Only Chats</option>
+                <option value="friends">👥 Only Friends & Friend Requests</option>
+                <option value="posts">📝 Only Posts</option>
+                <option value="notifications">🔔 Only Notifications</option>
+            </select>
+        </div>
+        
+        <button id="clearBtn">🗑️ Clear Selected Data</button>
+        <button id="clearAllUsersBtn" class="warning" style="margin-top: 12px;">⚠️ Clear ALL Users Data (Admin Only)</button>
+    </div>
+    
+    <div id="result" class="result" style="display: none;"></div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, remove, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    const ADMIN_UID = "6JkPCRetiCOX65opu4ofqAiTXaY2";
+    
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.style.background = isError ? '#dc2626' : '#1e293b';
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 3000);
+    }
+    
+    async function clearUserChats(userId) {
+        const messagesRef = ref(db, 'messages');
+        const snapshot = await get(messagesRef);
+        const messages = snapshot.val() || {};
+        let deletedCount = 0;
+        
+        for (const [chatId, chatMessages] of Object.entries(messages)) {
+            if (chatId.includes(userId)) {
+                await remove(ref(db, `messages/${chatId}`));
+                deletedCount++;
+            }
+        }
+        return deletedCount;
+    }
+    
+    async function clearUserFriendsAndRequests(userId) {
+        // Clear user's own friends and requests
+        await remove(ref(db, `users/${userId}/friends`));
+        await remove(ref(db, `users/${userId}/friendRequests`));
+        
+        // Also remove this user from other users' friends and requests
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        const users = snapshot.val() || {};
+        let cleanedCount = 0;
+        
+        for (const [otherId, otherUser] of Object.entries(users)) {
+            let updated = false;
+            
+            // Remove from other users' friends
+            if (otherUser.friends && otherUser.friends.includes(userId)) {
+                const newFriends = otherUser.friends.filter(id => id !== userId);
+                await remove(ref(db, `users/${otherId}/friends`));
+                if (newFriends.length > 0) {
+                    await set(ref(db, `users/${otherId}/friends`), newFriends);
+                }
+                updated = true;
+            }
+            
+            // Remove from other users' friendRequests
+            if (otherUser.friendRequests && otherUser.friendRequests.includes(userId)) {
+                const newRequests = otherUser.friendRequests.filter(id => id !== userId);
+                await remove(ref(db, `users/${otherId}/friendRequests`));
+                if (newRequests.length > 0) {
+                    await set(ref(db, `users/${otherId}/friendRequests`), newRequests);
+                }
+                updated = true;
+            }
+            
+            if (updated) cleanedCount++;
+        }
+        
+        return cleanedCount;
+    }
+    
+    async function clearUserPosts(userId) {
+        const postsRef = ref(db, 'posts');
+        const snapshot = await get(postsRef);
+        const posts = snapshot.val() || {};
+        let deletedCount = 0;
+        
+        for (const [postId, post] of Object.entries(posts)) {
+            if (post.userId === userId) {
+                await remove(ref(db, `posts/${postId}`));
+                deletedCount++;
+            }
+        }
+        return deletedCount;
+    }
+    
+    async function clearUserNotifications(userId) {
+        await remove(ref(db, `notifications/${userId}`));
+        return true;
+    }
+    
+    async function clearAllUserData(userId) {
+        const results = {
+            chats: await clearUserChats(userId),
+            friends: await clearUserFriendsAndRequests(userId),
+            posts: await clearUserPosts(userId),
+            notifications: await clearUserNotifications(userId)
+        };
+        return results;
+    }
+    
+    async function clearAllUsersData() {
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        const users = snapshot.val() || {};
+        let totalCleared = 0;
+        
+        for (const userId of Object.keys(users)) {
+            if (userId !== ADMIN_UID) {
+                await clearAllUserData(userId);
+                totalCleared++;
+            }
+        }
+        
+        return totalCleared;
+    }
+    
+    function displayResult(results, userId) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        
+        let html = `<strong>✅ Results for user: ${userId}</strong><br><br>`;
+        html += `<div style="margin-top: 10px;">`;
+        
+        if (results.chats !== undefined) {
+            html += `💬 Chats cleared: ${results.chats} chat(s)<br>`;
+        }
+        if (results.friends !== undefined) {
+            html += `👥 Friends/Requests cleared<br>`;
+        }
+        if (results.posts !== undefined) {
+            html += `📝 Posts cleared: ${results.posts} post(s)<br>`;
+        }
+        if (results.notifications !== undefined) {
+            html += `🔔 Notifications cleared<br>`;
+        }
+        
+        html += `</div>`;
+        resultDiv.innerHTML = html;
+        resultDiv.classList.add('success');
+        
+        setTimeout(() => {
+            resultDiv.classList.remove('success');
+        }, 3000);
+    }
+    
+    document.getElementById('clearBtn').addEventListener('click', async () => {
+        const userId = document.getElementById('userId').value.trim();
+        const clearType = document.getElementById('clearType').value;
+        
+        if (!userId) {
+            showToast("Please enter a User ID", true);
+            return;
+        }
+        
+        if (!confirm(`⚠️ Are you sure you want to clear ${clearType} for user ${userId}? This cannot be undone!`)) {
+            return;
+        }
+        
+        try {
+            let results = {};
+            
+            switch(clearType) {
+                case 'all':
+                    results = await clearAllUserData(userId);
+                    showToast(`✅ Cleared all data for user ${userId.substring(0,8)}...`);
+                    break;
+                case 'chats':
+                    const chatsCount = await clearUserChats(userId);
+                    results = { chats: chatsCount };
+                    showToast(`✅ Cleared ${chatsCount} chat(s) for user`);
+                    break;
+                case 'friends':
+                    const friendsCount = await clearUserFriendsAndRequests(userId);
+                    results = { friends: friendsCount };
+                    showToast(`✅ Cleared friends and requests`);
+                    break;
+                case 'posts':
+                    const postsCount = await clearUserPosts(userId);
+                    results = { posts: postsCount };
+                    showToast(`✅ Cleared ${postsCount} post(s)`);
+                    break;
+                case 'notifications':
+                    await clearUserNotifications(userId);
+                    results = { notifications: true };
+                    showToast(`✅ Cleared notifications`);
+                    break;
+            }
+            
+            displayResult(results, userId);
+            
+        } catch (error) {
+            console.error("Clear error:", error);
+            showToast("Error clearing data: " + error.message, true);
+        }
+    });
+    
+    document.getElementById('clearAllUsersBtn').addEventListener('click', async () => {
+        if (!confirm("⚠️⚠️⚠️ DANGER: This will clear ALL user data (chats, friends, posts) for ALL users except admin. This is IRREVERSIBLE! Type 'CONFIRM' to proceed.")) {
+            return;
+        }
+        
+        const confirmation = prompt('Type "CONFIRM" to proceed:');
+        if (confirmation !== 'CONFIRM') {
+            showToast("Operation cancelled", true);
+            return;
+        }
+        
+        try {
+            const count = await clearAllUsersData();
+            showToast(`✅ Cleared all data for ${count} users`);
+            
+            document.getElementById('result').innerHTML = `
+                <strong>✅ COMPLETE RESET</strong><br><br>
+                Cleared all data for ${count} users.<br>
+                All chats, friends, friend requests, and posts have been removed.<br><br>
+                <strong>⚠️ Refresh the page to see changes.</strong>
+            `;
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').classList.add('success');
+            
+        } catch (error) {
+            console.error("Clear all error:", error);
+            showToast("Error clearing all data: " + error.message, true);
+        }
+    });
+    
+    // Auto-fill current user if logged in
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            document.getElementById('userId').value = user.uid;
+            if (user.uid !== ADMIN_UID) {
+                document.getElementById('clearAllUsersBtn').disabled = true;
+                document.getElementById('clearAllUsersBtn').title = "Admin only";
+            }
+        }
+    });
+</script>
+</body>
+</html>

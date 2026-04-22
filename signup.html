@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Sign Up • SocialNest</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-image: url("naru.jpg");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .signup-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .logo-icon span {
+            font-family: 'Fira Code', monospace;
+            font-weight: 900;
+            font-size: 32px;
+            color: white;
+        }
+        
+        h2 {
+            text-align: center;
+            color: #1e293b;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #334155;
+            font-size: 13px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.2s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #667eea;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 16px 0;
+        }
+        
+        .checkbox-label input {
+            width: auto;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(95deg, #10b981, #059669);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: 0.2s;
+        }
+        
+        button:hover {
+            transform: scale(1.02);
+            opacity: 0.95;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .info-message {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Verification Modal */
+        .verification-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .verification-content {
+            background: white;
+            border-radius: 32px;
+            padding: 32px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .verification-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .verification-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1e293b;
+        }
+        
+        .verification-text {
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        
+        .verification-email {
+            font-weight: 600;
+            color: #667eea;
+            background: #f0f2ff;
+            padding: 8px;
+            border-radius: 12px;
+            margin: 16px 0;
+            word-break: break-all;
+        }
+        
+        .resend-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            width: 100%;
+        }
+        
+        .resend-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+        
+        .countdown {
+            color: #667eea;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .cancel-verification-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+        }
+        
+        /* Loading Screen */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-overlay.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+         .forgot-pass {
+            text-align: center;
+         }
+         
+         .forgot-pass a {
+            color: dodgerblue;
+            text-decoration: none;
+            font-weight: 600;
+         }
+    </style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="signup-container">
+    <div class="logo-icon"><span>SN</span></div>
+    <h2>Create Account</h2>
+    
+    <form id="signupForm">
+        <div class="form-group">
+            <label><i class="fas fa-user"></i> Username</label>
+            <input type="text" id="username" placeholder="Choose a username" required>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-user-circle"></i> Full Name</label>
+            <input type="text" id="fullname" placeholder="Enter your full name" required>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-envelope"></i> Email</label>
+            <input type="email" id="email" placeholder="your@email.com" required>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-lock"></i> Password</label>
+            <input type="password" id="password" placeholder="Minimum 6 characters" required>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-birthday-cake"></i> Birthday</label>
+            <input type="date" id="birthday" required>
+        </div>
+        
+        <div class="form-group">
+            <label><i class="fas fa-venus-mars"></i> Gender</label>
+            <select id="gender" required>
+                <option value="" disabled selected>— Select gender —</option>
+                <option value="male">👱‍♂️ Male</option>
+                <option value="female">👩‍🦳 Female</option>
+                <option value="other">🌈 Other</option>
+            </select>
+        </div>
+        
+        <label class="checkbox-label">
+            <input type="checkbox" name="agree" required>
+            <span>I agree to the <b>Terms and Conditions</b></span>
+        </label>
+        
+        <button type="submit" id="signupBtn">Create Account</button>
+    </form>
+    
+    <div id="errorMessage" class="error-message"></div>
+    
+    <div class="login-link">
+        Already have an account? <a href="login.html">Log in</a>
+    </div>
+    
+    <div class="forgot-pass"><a href="recover.html">Forgot password ??</a>
+    </div>
+</div>
+
+<!-- Verification Modal -->
+<div id="verificationModal" class="verification-modal">
+    <div class="verification-content">
+        <div class="verification-icon">📧</div>
+        <div class="verification-title">Verify Your Email</div>
+        <div class="verification-text">
+            We've sent a verification link to:
+        </div>
+        <div class="verification-email" id="verificationEmail">your@email.com</div>
+        <div class="verification-text">
+            A link has been sent to the provided email address... if not seen please check your spam, do so to verify your account.
+            <br><br>
+            <small>Once verified, you'll be automatically redirected.</small>
+        </div>
+        <button id="resendVerificationBtn" class="resend-btn">Resend Email <span id="countdownTimer"></span></button>
+        <button id="cancelVerificationBtn" class="cancel-verification-btn">Cancel</button>
+    </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    window.db = db;
+    window.auth = auth;
+    
+    let pendingUserData = null;
+    let countdownInterval = null;
+    let verificationCheckInterval = null;
+    
+    const signupForm = document.getElementById('signupForm');
+    const signupBtn = document.getElementById('signupBtn');
+    const errorDiv = document.getElementById('errorMessage');
+    const verificationModal = document.getElementById('verificationModal');
+    const verificationEmail = document.getElementById('verificationEmail');
+    const resendBtn = document.getElementById('resendVerificationBtn');
+    const cancelBtn = document.getElementById('cancelVerificationBtn');
+    const countdownTimer = document.getElementById('countdownTimer');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    function hideLoading() {
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('hide');
+            setTimeout(() => {
+                loadingOverlay.style.display = 'none';
+            }, 500);
+        }
+    }
+    
+    function showError(message) {
+        errorDiv.style.display = 'block';
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        errorDiv.style.backgroundColor = '#fee2e2';
+        errorDiv.style.color = '#dc2626';
+        
+        setTimeout(() => {
+            if (errorDiv.style.display === 'block') {
+                errorDiv.style.display = 'none';
+            }
+        }, 5000);
+    }
+    
+    function showInfo(message) {
+        errorDiv.style.display = 'block';
+        errorDiv.className = 'error-message info-message';
+        errorDiv.textContent = message;
+        
+        setTimeout(() => {
+            if (errorDiv.style.display === 'block') {
+                errorDiv.style.display = 'none';
+            }
+        }, 3000);
+    }
+    
+    function startCountdown(seconds) {
+        let remaining = seconds;
+        
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(() => {
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                if (countdownTimer) countdownTimer.textContent = '';
+                resendBtn.disabled = false;
+            } else {
+                resendBtn.disabled = true;
+                if (countdownTimer) countdownTimer.textContent = `(${remaining}s)`;
+                remaining--;
+            }
+        }, 1000);
+    }
+    
+    async function sendVerificationEmail(user) {
+        try {
+            await sendEmailVerification(user);
+            showInfo(`Verification email sent to ${user.email}`);
+            startCountdown(60);
+            return true;
+        } catch (error) {
+            console.error("Error sending verification:", error);
+            showError("Failed to send verification email. Please try again.");
+            return false;
+        }
+    }
+    
+    async function checkEmailVerified(user) {
+        await user.reload();
+        return user.emailVerified;
+    }
+    
+    async function waitForVerification(user) {
+        // Check every 3 seconds
+        verificationCheckInterval = setInterval(async () => {
+            const isVerified = await checkEmailVerified(user);
+            
+            if (isVerified) {
+                clearInterval(verificationCheckInterval);
+                verificationModal.style.display = 'none';
+                showInfo("✅ Email verified! Redirecting to dashboard...");
+                
+                // Save user data to database
+                if (pendingUserData) {
+                    await set(ref(db, `users/${user.uid}`), pendingUserData);
+                }
+                
+                // Save session
+                localStorage.setItem('socialnest_session_active', JSON.stringify({ userId: user.uid }));
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            }
+        }, 3000);
+        
+        // Timeout after 5 minutes
+        setTimeout(() => {
+            if (verificationCheckInterval) {
+                clearInterval(verificationCheckInterval);
+                if (verificationModal.style.display === 'flex') {
+                    showError("Verification timeout. Please check your email and try again.");
+                }
+            }
+        }, 300000);
+    }
+    
+    async function resendVerification() {
+        if (auth.currentUser) {
+            await sendVerificationEmail(auth.currentUser);
+            showInfo("Verification email resent! Check your inbox.");
+        }
+    }
+    
+    cancelBtn.addEventListener('click', async () => {
+        if (countdownInterval) clearInterval(countdownInterval);
+        if (verificationCheckInterval) clearInterval(verificationCheckInterval);
+        verificationModal.style.display = 'none';
+        if (auth.currentUser) {
+            await signOut(auth);
+        }
+        signupBtn.disabled = false;
+        signupBtn.innerHTML = 'Create Account';
+        pendingUserData = null;
+        showInfo("Registration cancelled. You can try again.");
+    });
+    
+    resendBtn.addEventListener('click', resendVerification);
+    
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('username').value.trim();
+        const fullname = document.getElementById('fullname').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const birthday = document.getElementById('birthday').value;
+        const gender = document.getElementById('gender').value;
+        const agreeTerms = document.querySelector('input[name="agree"]').checked;
+        
+        errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
+        
+        if (username.length < 3) {
+            showError('Username must be at least 3 characters');
+            return;
+        }
+        if (fullname.length < 3) {
+            showError('Please enter your full name');
+            return;
+        }
+        if (!email.includes('@')) {
+            showError('Enter a valid email address');
+            return;
+        }
+        if (password.length < 6) {
+            showError('Password must be at least 6 characters');
+            return;
+        }
+        if (!birthday) {
+            showError('Please enter your birthday');
+            return;
+        }
+        if (!gender) {
+            showError('Please select your gender');
+            return;
+        }
+        if (!agreeTerms) {
+            showError('You must agree to the terms');
+            return;
+        }
+        
+        signupBtn.disabled = true;
+        signupBtn.innerHTML = '<span class="spinner"></span> Creating account...';
+        
+        try {
+            // Check if username/email exists
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            const users = snapshot.val();
+            
+            if (users) {
+                for (const [id, user] of Object.entries(users)) {
+                    if (user.username === username) {
+                        showError('Username already taken');
+                        signupBtn.disabled = false;
+                        signupBtn.innerHTML = 'Create Account';
+                        return;
+                    }
+                    if (user.email === email) {
+                        showError('Email already registered');
+                        signupBtn.disabled = false;
+                        signupBtn.innerHTML = 'Create Account';
+                        return;
+                    }
+                }
+            }
+            
+            // Create user
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            
+            pendingUserData = {
+                uid: user.uid,
+                username: username,
+                displayName: fullname,
+                fullname: fullname,
+                email: email,
+                birthday: birthday,
+                gender: gender,
+                profilePic: `https://ui-avatars.com/api/?background=667eea&color=fff&name=${encodeURIComponent(fullname.charAt(0))}`,
+                bio: '',
+                location: '',
+                coverPic: '',
+                work: '',
+                education: '',
+                relationship: '',
+                friends: [],
+                friendRequests: [],
+                posts: [],
+                emailVerified: false,
+                createdAt: new Date().toISOString()
+            };
+            
+            const emailSent = await sendVerificationEmail(user);
+            
+            if (emailSent) {
+                verificationEmail.textContent = email;
+                verificationModal.style.display = 'flex';
+                waitForVerification(user);
+                hideLoading();
+            } else {
+                await signOut(auth);
+                showError("Failed to send verification email. Please try again.");
+                signupBtn.disabled = false;
+                signupBtn.innerHTML = 'Create Account';
+                pendingUserData = null;
+            }
+            
+        } catch (error) {
+            console.error("Signup error:", error);
+            
+            let errorMessage = 'Registration failed. Please try again.';
+            switch (error.code) {
+                case 'auth/email-already-in-use':
+                    errorMessage = 'Email already registered. Please login instead.';
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = 'Password is too weak. Use at least 6 characters.';
+                    break;
+                case 'auth/invalid-email':
+                    errorMessage = 'Invalid email address.';
+                    break;
+                default:
+                    errorMessage = error.message;
+            }
+            
+            showError(errorMessage);
+            signupBtn.disabled = false;
+            signupBtn.innerHTML = 'Create Account';
+            
+            const user = auth.currentUser;
+            if (user) {
+                await user.delete();
+            }
+            pendingUserData = null;
+        }
+    });
+    
+    // Hide loading on page load
+    window.addEventListener('load', hideLoading);
+    setTimeout(hideLoading, 3000);
+</script>
+
+</body>
+</html>

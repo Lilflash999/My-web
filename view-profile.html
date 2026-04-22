@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SocialNest • User Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background: url('naru.jpg');
+            background-size: cover;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .profile-container {
+            max-width: 500px;
+            margin: 20px auto;
+            background: rgba(221, 221, 221, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .cover-area {
+            height: 150px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            position: relative;
+            overflow: hidden;
+        }
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-section {
+            position: relative;
+            padding: 0 20px;
+            text-align: center;
+        }
+        .profile-pic-wrapper {
+            position: relative;
+            margin-top: -60px;
+            display: inline-block;
+        }
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+        .stat-card {
+            text-align: center;
+            background: #f8f9fc;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+        .stat-number {
+            font-size: 22px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .profile-info {
+            padding: 16px 20px;
+            text-align: center;
+            border-bottom: 1px solid #eef2f6;
+        }
+        .display-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .owner-badge {
+            background: #fbbf24;
+            color: #1e293b;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .username {
+            color: #64748b;
+            margin-top: 4px;
+            font-size: 14px;
+        }
+        .bio {
+            margin-top: 12px;
+            color: #334155;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        .location, .relationship {
+            margin-top: 8px;
+            color: #667eea;
+            font-size: 13px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            padding: 16px 20px;
+        }
+        .friend-action-btn {
+            flex: 1;
+            border: none;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .friend-action-btn.add {
+            background: #10b981;
+            color: white;
+        }
+        .friend-action-btn.add:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+        .friend-action-btn.pending {
+            background: #f59e0b;
+            color: white;
+        }
+        .friend-action-btn.pending:hover {
+            background: #d97706;
+        }
+        .friend-action-btn.friends {
+            background: #ef4444;
+            color: white;
+        }
+        .friend-action-btn.friends:hover {
+            background: #dc2626;
+        }
+        .friend-action-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .section-title {
+            padding: 16px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border-bottom: 1px solid #eef2f6;
+            background: #f8f9fc;
+        }
+        
+        .posts-grid {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .post-card {
+            background: #f8f9fc;
+            border-radius: 20px;
+            padding: 14px;
+            border: 1px solid #eef2f6;
+            transition: 0.2s;
+        }
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .post-content {
+            color: #1e293b;
+            font-size: 13px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .post-media {
+            max-width: 100%;
+            border-radius: 16px;
+            margin-top: 10px;
+            max-height: 200px;
+        }
+        .post-stats {
+            margin-top: 10px;
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #64748b;
+        }
+        
+        .three-dot-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: white;
+            cursor: pointer;
+            z-index: 15;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .three-dot-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 55px;
+            right: 15px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 170px;
+            display: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #1e293b;
+            font-size: 13px;
+            border-bottom: 1px solid #eef2f6;
+        }
+        .dropdown-item:hover {
+            background: #f0f2f5;
+        }
+        .dropdown-item.danger {
+            color: #dc2626;
+        }
+        .dropdown-item.danger:hover {
+            background: #fee2e2;
+        }
+        
+        .back-btn {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            background: white;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            cursor: pointer;
+            z-index: 10;
+            color: #1e293b;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .back-btn:hover {
+            background: #f0f2f5;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 28px;
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+        }
+        .modal-content h3 {
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        .report-reasons {
+            margin: 16px 0;
+        }
+        .report-reason {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .report-reason:hover {
+            background: #f0f2f5;
+        }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            margin: 12px 0;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .submit-btn {
+            flex: 1;
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .cancel-btn {
+            flex: 1;
+            background: #94a3b8;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            z-index: 1000;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 480px) {
+            .profile-container { margin: 10px; }
+            .profile-img { width: 80px; height: 80px; margin-top: -40px; }
+            .display-name { font-size: 18px; }
+            .stat-card { padding: 6px 12px; }
+            .stat-number { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="back-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back</button>
+
+<div class="profile-container" style="position: relative;">
+    <button class="three-dot-btn" id="threeDotBtn"><i class="fas fa-ellipsis-v"></i></button>
+    <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-item danger" id="reportUserBtn">
+            <i class="fas fa-flag"></i> Report User
+        </div>
+        <div class="dropdown-item" id="blockUserBtn">
+            <i class="fas fa-ban"></i> Block User
+        </div>
+        <div class="dropdown-item" id="shareProfileBtn">
+            <i class="fas fa-share-alt"></i> Share Profile
+        </div>
+    </div>
+    
+    <div class="cover-area">
+        <img id="coverImage" class="cover-img" style="display:none;">
+    </div>
+    
+    <div class="avatar-section">
+        <div class="profile-pic-wrapper">
+            <img id="profileImage" class="profile-img" src="https://ui-avatars.com/api/?background=667eea&color=fff">
+        </div>
+    </div>
+    
+    <div class="stats-row">
+        <div class="stat-card"><div class="stat-number" id="postCount">0</div><div class="stat-label">Posts</div></div>
+        <div class="stat-card"><div class="stat-number" id="friendCount">0</div><div class="stat-label">Friends</div></div>
+    </div>
+    
+    <div class="profile-info">
+        <div class="display-name" id="displayName"></div>
+        <div class="username" id="username"></div>
+        <div class="bio" id="displayBio"></div>
+        <div class="location"><i class="fas fa-map-marker-alt"></i> <span id="locationValue"></span></div>
+        <div class="relationship"><i class="fas fa-heart"></i> <span id="relationshipValue"></span></div>
+    </div>
+    
+    <div class="action-buttons">
+        <button class="friend-action-btn add" id="friendActionBtn"><i class="fas fa-user-plus"></i> Add Friend</button>
+    </div>
+    
+    <div class="section-title"><i class="fas fa-newspaper"></i> Recent Public Posts</div>
+    <div class="posts-grid" id="userPostsContainer"></div>
+</div>
+
+<div id="toastMsg" class="toast"></div>
+
+<!-- Report Modal -->
+<div id="reportModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-flag"></i> Report User</h3>
+        <p>Reporting: <strong id="reportUserName"></strong></p>
+        <div class="report-reasons">
+            <label class="report-reason"><input type="radio" name="reason" value="Spam"> 📢 Spam / Promotional content</label>
+            <label class="report-reason"><input type="radio" name="reason" value="Harassment"> 😡 Harassment / Bullying</label>
+            <label class="report-reason"><input type="radio" name="reason" value="Inappropriate"> 🔞 Inappropriate content</label>
+            <label class="report-reason"><input type="radio" name="reason" value="Fake Account"> 🎭 Fake / Impersonation account</label>
+            <label class="report-reason"><input type="radio" name="reason" value="Hate Speech"> 💢 Hate speech / Discrimination</label>
+            <label class="report-reason"><input type="radio" name="reason" value="Other"> ❓ Other</label>
+        </div>
+        <textarea id="reportDetails" placeholder="Additional details (optional)..." rows="4"></textarea>
+        <div class="modal-buttons">
+            <button class="submit-btn" id="submitReportBtn">Submit Report</button>
+            <button class="cancel-btn" id="cancelReportBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, update, push, set, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    let currentUserId = null;
+    let viewedUserId = null;
+    let viewedUserData = null;
+    let currentUserData = null;
+    const OWNER_UID = "6JkPCRetiCOX65opu4ofqAiTXaY2";
+    
+    function showToast(msg, isError = false) {
+        let t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.background = isError ? '#dc2626' : '#1e293b';
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 3000);
+    }
+    
+    function escapeHTML(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+    
+    // Update friend action button based on relationship status
+    async function updateFriendActionButton() {
+        if (!currentUserData || !viewedUserData) return;
+        
+        const btn = document.getElementById('friendActionBtn');
+        const isFriend = currentUserData.friends?.includes(viewedUserId);
+        const requestSent = viewedUserData.friendRequests?.includes(currentUserId);
+        const requestReceived = currentUserData.friendRequests?.includes(viewedUserId);
+        
+        if (isFriend) {
+            btn.innerHTML = '<i class="fas fa-user-minus"></i> Remove Friend';
+            btn.className = 'friend-action-btn friends';
+            btn.disabled = false;
+        } else if (requestSent) {
+            btn.innerHTML = '<i class="fas fa-clock"></i> Cancel Request';
+            btn.className = 'friend-action-btn pending';
+            btn.disabled = false;
+        } else if (requestReceived) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Accept Request';
+            btn.className = 'friend-action-btn add';
+            btn.disabled = false;
+        } else {
+            btn.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+            btn.className = 'friend-action-btn add';
+            btn.disabled = false;
+        }
+    }
+    
+    // Remove friend
+    async function removeFriend() {
+        if (!confirm(`Remove ${viewedUserData?.displayName} from your friends?`)) return;
+        
+        try {
+            // Remove from current user's friends list
+            const currentFriends = currentUserData.friends || [];
+            const newCurrentFriends = currentFriends.filter(id => id !== viewedUserId);
+            await update(ref(db, `users/${currentUserId}`), { friends: newCurrentFriends });
+            
+            // Remove from viewed user's friends list
+            const viewedFriends = viewedUserData.friends || [];
+            const newViewedFriends = viewedFriends.filter(id => id !== currentUserId);
+            await update(ref(db, `users/${viewedUserId}`), { friends: newViewedFriends });
+            
+            showToast(`Removed ${viewedUserData?.displayName} from friends`);
+            
+            // Refresh data
+            await loadCurrentUser();
+            await loadUserProfile(viewedUserId);
+            await updateFriendActionButton();
+            
+        } catch (error) {
+            console.error("Remove friend error:", error);
+            showToast("Error removing friend", true);
+        }
+    }
+    
+    // Cancel sent friend request
+    async function cancelFriendRequest() {
+        if (!confirm(`Cancel friend request to ${viewedUserData?.displayName}?`)) return;
+        
+        try {
+            const viewedRequests = viewedUserData.friendRequests || [];
+            const newViewedRequests = viewedRequests.filter(id => id !== currentUserId);
+            await update(ref(db, `users/${viewedUserId}`), { friendRequests: newViewedRequests });
+            
+            showToast(`Cancelled request to ${viewedUserData?.displayName}`);
+            
+            // Refresh data
+            await loadCurrentUser();
+            await loadUserProfile(viewedUserId);
+            await updateFriendActionButton();
+            
+        } catch (error) {
+            console.error("Cancel request error:", error);
+            showToast("Error cancelling request", true);
+        }
+    }
+    
+    // Accept friend request
+    async function acceptFriendRequest() {
+        try {
+            // Add to current user's friends
+            const currentFriends = currentUserData.friends || [];
+            const newCurrentFriends = [...currentFriends, viewedUserId];
+            
+            // Remove from current user's friendRequests
+            const currentRequests = currentUserData.friendRequests || [];
+            const newCurrentRequests = currentRequests.filter(id => id !== viewedUserId);
+            
+            await update(ref(db, `users/${currentUserId}`), {
+                friends: newCurrentFriends,
+                friendRequests: newCurrentRequests
+            });
+            
+            // Add to viewed user's friends
+            const viewedFriends = viewedUserData.friends || [];
+            const newViewedFriends = [...viewedFriends, currentUserId];
+            
+            // Remove from viewed user's friendRequests (if exists)
+            const viewedRequests = viewedUserData.friendRequests || [];
+            const newViewedRequests = viewedRequests.filter(id => id !== currentUserId);
+            
+            await update(ref(db, `users/${viewedUserId}`), {
+                friends: newViewedFriends,
+                friendRequests: newViewedRequests
+            });
+            
+            showToast(`You are now friends with ${viewedUserData?.displayName}!`);
+            
+            // Refresh data
+            await loadCurrentUser();
+            await loadUserProfile(viewedUserId);
+            await updateFriendActionButton();
+            
+        } catch (error) {
+            console.error("Accept request error:", error);
+            showToast("Error accepting request", true);
+        }
+    }
+    
+    // Send friend request
+    async function sendFriendRequest() {
+        if (!viewedUserId) return;
+        
+        try {
+            const targetUserRef = ref(db, `users/${viewedUserId}`);
+            const requests = viewedUserData.friendRequests || [];
+            
+            if (requests.includes(currentUserId)) {
+                showToast('Request already sent');
+                return;
+            }
+            
+            await update(targetUserRef, { friendRequests: [...requests, currentUserId] });
+            showToast(`Friend request sent to ${viewedUserData?.displayName}`);
+            
+            // Refresh data
+            await loadCurrentUser();
+            await loadUserProfile(viewedUserId);
+            await updateFriendActionButton();
+            
+        } catch (error) {
+            console.error("Error sending request:", error);
+            showToast("Error sending request", true);
+        }
+    }
+    
+    // Handle friend action button click
+    function handleFriendAction() {
+        const isFriend = currentUserData?.friends?.includes(viewedUserId);
+        const requestSent = viewedUserData?.friendRequests?.includes(currentUserId);
+        const requestReceived = currentUserData?.friendRequests?.includes(viewedUserId);
+        
+        if (isFriend) {
+            removeFriend();
+        } else if (requestSent) {
+            cancelFriendRequest();
+        } else if (requestReceived) {
+            acceptFriendRequest();
+        } else {
+            sendFriendRequest();
+        }
+    }
+    
+    // Load current user data
+    async function loadCurrentUser() {
+        try {
+            const userRef = ref(db, `users/${currentUserId}`);
+            const snapshot = await get(userRef);
+            currentUserData = snapshot.val() || {};
+        } catch (error) {
+            console.error("Error loading current user:", error);
+        }
+    }
+    
+    // Load user profile with counts
+    async function loadUserProfile(userId) {
+        try {
+            const userRef = ref(db, `users/${userId}`);
+            const snapshot = await get(userRef);
+            viewedUserData = snapshot.val();
+            
+            if (!viewedUserData) {
+                showToast("User not found", true);
+                return;
+            }
+            
+            // Profile picture
+            document.getElementById('profileImage').src = viewedUserData.profilePic || 'https://ui-avatars.com/api/?background=667eea&color=fff';
+            
+            // Display name with owner badge
+            const nameSpan = document.getElementById('displayName');
+            nameSpan.innerHTML = escapeHTML(viewedUserData.displayName || 'User');
+            if (userId === OWNER_UID) {
+                nameSpan.innerHTML += ' <span class="owner-badge"><i class="fas fa-crown"></i> OWNER</span>';
+            }
+            
+            // Username
+            const username = viewedUserData.username || viewedUserData.email?.split('@')[0] || 'user';
+            document.getElementById('username').textContent = '@' + username;
+            
+            // Bio
+            document.getElementById('displayBio').textContent = viewedUserData.bio || 'No bio yet';
+            
+            // Location & Relationship
+            const locationSpan = document.getElementById('locationValue');
+            const relationSpan = document.getElementById('relationshipValue');
+            if (viewedUserData.location) {
+                locationSpan.textContent = viewedUserData.location;
+                locationSpan.parentElement.style.display = 'flex';
+            } else {
+                locationSpan.parentElement.style.display = 'none';
+            }
+            if (viewedUserData.relationship) {
+                const map = { single: 'Single', married: 'Married', 'in a relationship': 'In a relationship', engaged: 'Engaged', 'its complicated': 'It\'s complicated' };
+                relationSpan.textContent = map[viewedUserData.relationship] || viewedUserData.relationship;
+                relationSpan.parentElement.style.display = 'flex';
+            } else {
+                relationSpan.parentElement.style.display = 'none';
+            }
+            
+            // Cover photo
+            if (viewedUserData.coverPic) {
+                const coverImg = document.getElementById('coverImage');
+                coverImg.src = viewedUserData.coverPic;
+                coverImg.style.display = 'block';
+            }
+            
+            // Update counts
+            await updateCounts(userId);
+            
+        } catch (error) {
+            console.error("Error loading profile:", error);
+            showToast("Error loading profile", true);
+        }
+    }
+    
+    // Update post count and friend count
+    async function updateCounts(userId) {
+        try {
+            // Count posts
+            const postsRef = ref(db, 'posts');
+            const postsSnap = await get(postsRef);
+            let postCount = 0;
+            if (postsSnap.exists()) {
+                const posts = postsSnap.val();
+                for (const post of Object.values(posts)) {
+                    if (post.userId === userId && post.privacy !== 'private') {
+                        postCount++;
+                    }
+                }
+            }
+            document.getElementById('postCount').textContent = postCount;
+            
+            // Count friends
+            const friendCount = viewedUserData.friends ? viewedUserData.friends.length : 0;
+            document.getElementById('friendCount').textContent = friendCount;
+            
+        } catch (err) {
+            console.error("Count error:", err);
+        }
+    }
+    
+    // Load user public posts
+    async function loadUserPosts(userId) {
+        try {
+            const postsRef = ref(db, 'posts');
+            const snapshot = await get(postsRef);
+            const posts = snapshot.val() || {};
+            const userPosts = [];
+            
+            for (const [id, post] of Object.entries(posts)) {
+                if (post.userId === userId && post.privacy !== 'private') {
+                    userPosts.push({ id, ...post });
+                }
+            }
+            userPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            const container = document.getElementById('userPostsContainer');
+            if (userPosts.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#6c757d;">No public posts</div>';
+                return;
+            }
+            
+            container.innerHTML = userPosts.map(post => `
+                <div class="post-card">
+                    <div class="post-content">${escapeHTML(post.content)}</div>
+                    ${post.media ? (post.mediaType === 'image' ? `<img src="${post.media}" class="post-media">` : `<video src="${post.media}" class="post-media" controls></video>`) : ''}
+                    <div class="post-stats">❤️ ${post.likes?.length || 0} likes • 💬 ${post.comments?.length || 0} comments</div>
+                </div>
+            `).join('');
+        } catch (error) {
+            console.error("Error loading posts:", error);
+        }
+    }
+    
+    // Block user
+    async function blockUser() {
+        if (!viewedUserId) return;
+        if (viewedUserId === currentUserId) {
+            showToast("You cannot block yourself", true);
+            return;
+        }
+        if (!confirm(`Block ${viewedUserData?.displayName}? They will not be able to message you.`)) return;
+        
+        try {
+            const currentUserRef = ref(db, `users/${currentUserId}`);
+            const snap = await get(currentUserRef);
+            let blocked = snap.val()?.blockedUsers || [];
+            if (!blocked.includes(viewedUserId)) {
+                blocked.push(viewedUserId);
+                await update(currentUserRef, { blockedUsers: blocked });
+                showToast(`${viewedUserData?.displayName} blocked`);
+            } else {
+                showToast("Already blocked", true);
+            }
+        } catch (err) {
+            console.error("Block error:", err);
+            showToast("Failed to block user", true);
+        }
+    }
+    
+    // Share profile
+    function shareProfile() {
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            showToast("Profile link copied to clipboard");
+        }).catch(() => {
+            showToast("Failed to copy link", true);
+        });
+    }
+    
+    // Submit report
+    async function submitReport() {
+        const selectedRadio = document.querySelector('input[name="reason"]:checked');
+        if (!selectedRadio) {
+            alert("Please select a reason for reporting");
+            return;
+        }
+        
+        const reason = selectedRadio.value;
+        const details = document.getElementById('reportDetails').value.trim();
+        
+        if (!viewedUserId) {
+            showToast("Error: User not found", true);
+            return;
+        }
+        
+        try {
+            const reportData = {
+                reportedUserId: viewedUserId,
+                reportedUserName: viewedUserData?.displayName || "Unknown User",
+                reportedByUserId: currentUserId,
+                reportedByUserName: currentUserData?.displayName || "Anonymous",
+                reason: reason,
+                details: details || "",
+                status: "pending",
+                createdAt: new Date().toISOString(),
+                timestamp: Date.now()
+            };
+            
+            const reportsRef = ref(db, 'reports');
+            const newReportRef = push(reportsRef);
+            await set(newReportRef, reportData);
+            
+            showToast("✅ Report submitted! Admin will review.");
+            document.getElementById('reportModal').style.display = 'none';
+            selectedRadio.checked = false;
+            document.getElementById('reportDetails').value = '';
+            
+        } catch (error) {
+            console.error("Report error:", error);
+            showToast("❌ Error submitting report", true);
+        }
+    }
+    
+    function cancelReport() {
+        document.getElementById('reportModal').style.display = 'none';
+        const radios = document.querySelectorAll('input[name="reason"]');
+        radios.forEach(radio => radio.checked = false);
+        document.getElementById('reportDetails').value = '';
+    }
+    
+    function setupEventListeners() {
+        // 3-dot menu
+        const threeDotBtn = document.getElementById('threeDotBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        threeDotBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+        document.addEventListener('click', () => dropdownMenu.classList.remove('show'));
+        
+        // Report
+        document.getElementById('reportUserBtn').addEventListener('click', () => {
+            document.getElementById('reportUserName').textContent = viewedUserData?.displayName || 'this user';
+            document.getElementById('reportModal').style.display = 'flex';
+            dropdownMenu.classList.remove('show');
+        });
+        document.getElementById('submitReportBtn').addEventListener('click', submitReport);
+        document.getElementById('cancelReportBtn').addEventListener('click', cancelReport);
+        
+        // Block
+        document.getElementById('blockUserBtn').addEventListener('click', () => {
+            dropdownMenu.classList.remove('show');
+            blockUser();
+        });
+        
+        // Share
+        document.getElementById('shareProfileBtn').addEventListener('click', () => {
+            dropdownMenu.classList.remove('show');
+            shareProfile();
+        });
+        
+        // Friend action (Add/Cancel/Remove/Accept)
+        document.getElementById('friendActionBtn').addEventListener('click', handleFriendAction);
+        
+        // Close modal on outside click
+        const modal = document.getElementById('reportModal');
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) cancelReport();
+        });
+    }
+    
+    // Main
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        currentUserId = user.uid;
+        const uid = getUrlParameter('uid');
+        
+        if (!uid) {
+            showToast("Invalid profile", true);
+            setTimeout(() => window.location.href = 'dashboard.html', 1500);
+            return;
+        }
+        
+        if (uid === currentUserId) {
+            window.location.href = 'profile.html';
+            return;
+        }
+        
+        viewedUserId = uid;
+        await loadCurrentUser();
+        await loadUserProfile(viewedUserId);
+        await loadUserPosts(viewedUserId);
+        await updateFriendActionButton();
+        setupEventListeners();
+    });
+</script>
+</body>
+</html>

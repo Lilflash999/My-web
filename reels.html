@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SocialNest • Reels</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body {
+            background: #000;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        .reels-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+        }
+        .reels-container::-webkit-scrollbar { display: none; }
+        .reel-item {
+            scroll-snap-align: start;
+            height: 100vh;
+            position: relative;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .reel-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        /* Right side action bar */
+        .action-bar {
+            position: absolute;
+            right: 12px;
+            bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            z-index: 10;
+        }
+        .action-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .action-btn {
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            position: relative;
+        }
+        .action-btn span {
+            font-size: 12px;
+            position: absolute;
+            bottom: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+        .action-btn.liked {
+            background: #e0245e;
+            color: white;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.3);
+        }
+        /* Reaction picker */
+        .reaction-picker {
+            position: fixed;
+            bottom: 120px;
+            right: 70px;
+            background: rgba(30,30,40,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 60px;
+            padding: 8px 16px;
+            display: flex;
+            gap: 12px;
+            z-index: 200;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 0.2s ease;
+        }
+        .reaction-emoji {
+            font-size: 32px;
+            cursor: pointer;
+            transition: 0.1s;
+            padding: 4px;
+        }
+        .reaction-emoji:hover {
+            transform: scale(1.3);
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .reel-caption {
+            position: absolute;
+            bottom: 30px;
+            left: 16px;
+            right: 100px;
+            color: white;
+            text-shadow: 0 1px 2px black;
+            font-size: 14px;
+            background: linear-gradient(to right, rgba(0,0,0,0.5), transparent);
+            padding: 8px 12px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            border: none;
+            color: white;
+            font-size: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        .skeleton-video {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            z-index: 1000;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        /* Play button overlay for manual start if needed */
+        .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            backdrop-filter: blur(4px);
+        }
+        .play-overlay i {
+            font-size: 30px;
+            color: white;
+            margin-left: 4px;
+        }
+        @media (max-width: 480px) {
+            .action-btn { width: 40px; height: 40px; font-size: 20px; }
+            .action-avatar { width: 40px; height: 40px; }
+            .action-bar { gap: 16px; right: 8px; bottom: 60px; }
+            .reaction-picker { right: 50px; bottom: 100px; padding: 6px 12px; gap: 8px; }
+            .reaction-emoji { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="back-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i></button>
+
+<div id="reelsContainer" class="reels-container"></div>
+<div id="toastMsg" class="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, onValue, update, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    let currentUser = null;
+    let allReels = [];
+    let videoObserver = null;
+    let currentReactionPicker = null;
+    
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.background = isError ? '#dc2626' : '#1e293b';
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+    function escapeHTML(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;' }[m])); }
+    function getTimeAgo(date) { const s = Math.floor((new Date()-date)/1000); if(s<60) return 'Just now'; if(s<3600) return `${Math.floor(s/60)}m ago`; if(s<86400) return `${Math.floor(s/3600)}h ago`; return `${Math.floor(s/86400)}d ago`; }
+    
+    // Reactions mapping
+    const reactions = {
+        '❤️': 'love',
+        '😂': 'laugh',
+        '😒': 'sad',
+        '😱': 'shock',
+        '🥰': 'heart_eyes',
+        '😡': 'angry'
+    };
+    
+    async function addReaction(postId, reactionType, postUserId) {
+        const postRef = ref(db, `posts/${postId}`);
+        const snap = await get(postRef);
+        const post = snap.val();
+        if (!post) return;
+        let currentReactions = post.reactions || {};
+        // Remove previous reaction from same user
+        for (let [emoji, users] of Object.entries(currentReactions)) {
+            if (users.includes(currentUser.uid)) {
+                currentReactions[emoji] = users.filter(id => id !== currentUser.uid);
+                if (currentReactions[emoji].length === 0) delete currentReactions[emoji];
+            }
+        }
+        // Add new reaction
+        if (!currentReactions[reactionType]) currentReactions[reactionType] = [];
+        if (!currentReactions[reactionType].includes(currentUser.uid)) {
+            currentReactions[reactionType].push(currentUser.uid);
+        }
+        await update(postRef, { reactions: currentReactions });
+        if (postUserId !== currentUser.uid) {
+            await addNotification(postUserId, 'reaction', {
+                fromId: currentUser.uid,
+                fromName: currentUser.displayName,
+                postId: postId,
+                reaction: reactionType
+            });
+        }
+        showToast(`Reacted ${reactionType}`);
+    }
+    
+    async function addNotification(userId, type, data) {
+        const notifRef = ref(db, `notifications/${userId}`);
+        const newNotif = push(notifRef);
+        await set(newNotif, { id: newNotif.key, type, data, read: false, timestamp: Date.now() });
+    }
+    
+    async function addComment(postId, commentText, postUserId) {
+        if (!commentText.trim()) return;
+        const postRef = ref(db, `posts/${postId}`);
+        const snap = await get(postRef);
+        const post = snap.val();
+        const newComment = { id: Date.now().toString(), userId: currentUser.uid, userName: currentUser.displayName, userProfilePic: currentUser.profilePic, text: commentText.trim(), timestamp: new Date().toISOString() };
+        await update(postRef, { comments: [...(post.comments||[]), newComment] });
+        if (postUserId !== currentUser.uid) {
+            await addNotification(postUserId, 'comment', { fromId: currentUser.uid, fromName: currentUser.displayName, postId, comment: commentText.trim() });
+        }
+        showToast("💬 Comment added");
+    }
+    
+    async function repostPost(originalPost, originalUserId) {
+        if (!currentUser) return;
+        const repostKey = `repost_${currentUser.uid}_${originalPost.id}`;
+        const checkSnap = await get(ref(db, `reposts/${repostKey}`));
+        if (checkSnap.exists()) { showToast("Already reposted", true); return; }
+        const userSnap = await get(ref(db, `users/${originalUserId}`));
+        const originalUser = userSnap.val();
+        const originalName = originalUser?.displayName || originalUser?.username || "someone";
+        const postsRef = ref(db, 'posts');
+        const newPostRef = push(postsRef);
+        const repostContent = `🔁 Reposted from @${originalName}: ${originalPost.content || ""}`;
+        const repostData = {
+            id: newPostRef.key, content: repostContent, media: originalPost.media || null, mediaType: originalPost.mediaType || null,
+            userId: currentUser.uid, originalPostId: originalPost.id, originalAuthorId: originalUserId,
+            timestamp: new Date().toISOString(), likes: [], comments: [], privacy: 'public', repostCount: (originalPost.repostCount||0)+1
+        };
+        await set(newPostRef, repostData);
+        await set(ref(db, `reposts/${repostKey}`), { postId: originalPost.id, repostedAt: Date.now() });
+        await update(ref(db, `posts/${originalPost.id}`), { repostCount: (originalPost.repostCount||0)+1 });
+        showToast("Reposted!");
+    }
+    
+    function showReactionPicker(button, postId, postUserId) {
+        if (currentReactionPicker) currentReactionPicker.remove();
+        const picker = document.createElement('div');
+        picker.className = 'reaction-picker';
+        for (let emoji in reactions) {
+            const span = document.createElement('span');
+            span.className = 'reaction-emoji';
+            span.textContent = emoji;
+            span.onclick = async (e) => {
+                e.stopPropagation();
+                await addReaction(postId, reactions[emoji], postUserId);
+                picker.remove();
+                currentReactionPicker = null;
+                updateLikeButtonDisplay(button, postId);
+            };
+            picker.appendChild(span);
+        }
+        document.body.appendChild(picker);
+        currentReactionPicker = picker;
+        const removePicker = (e) => {
+            if (!picker.contains(e.target)) {
+                picker.remove();
+                currentReactionPicker = null;
+                document.removeEventListener('click', removePicker);
+            }
+        };
+        setTimeout(() => document.addEventListener('click', removePicker), 100);
+    }
+    
+    async function updateLikeButtonDisplay(button, postId) {
+        const snap = await get(ref(db, `posts/${postId}`));
+        const post = snap.val();
+        if (!post) return;
+        const reactionsObj = post.reactions || {};
+        let userReaction = null;
+        for (let [type, users] of Object.entries(reactionsObj)) {
+            if (users.includes(currentUser.uid)) {
+                userReaction = type;
+                break;
+            }
+        }
+        const total = Object.values(reactionsObj).reduce((a,b)=>a+b.length,0);
+        if (userReaction) {
+            const emojiMap = { love:'❤️', laugh:'😂', sad:'😒', shock:'😱', heart_eyes:'🥰', angry:'😡' };
+            const emoji = emojiMap[userReaction] || '❤️';
+            button.innerHTML = `${emoji} <span>${total}</span>`;
+            button.classList.add('liked');
+        } else {
+            button.innerHTML = `❤️ <span>${total}</span>`;
+            button.classList.remove('liked');
+        }
+    }
+    
+    // ========== VIDEO PLAYBACK FIX ==========
+    function playVideoIfNeeded(video) {
+        if (!video) return;
+        // Muted videos can autoplay
+        video.muted = true;
+        video.playsInline = true;
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log("Autoplay prevented, showing play overlay");
+                // Show play overlay if needed
+                const parent = video.closest('.reel-item');
+                if (parent && !parent.querySelector('.play-overlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'play-overlay';
+                    overlay.innerHTML = '<i class="fas fa-play"></i>';
+                    overlay.onclick = () => {
+                        video.play();
+                        overlay.remove();
+                    };
+                    parent.appendChild(overlay);
+                }
+            });
+        }
+    }
+    
+    function setupAutoplay() {
+        if (videoObserver) videoObserver.disconnect();
+        videoObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target.querySelector('video');
+                if (video) {
+                    if (entry.isIntersecting) {
+                        playVideoIfNeeded(video);
+                    } else {
+                        video.pause();
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.reel-item').forEach(item => videoObserver.observe(item));
+    }
+    
+    // ========== RENDER REELS ==========
+    function showSkeletonReels() {
+        const container = document.getElementById('reelsContainer');
+        container.innerHTML = '';
+        for (let i=0; i<3; i++) {
+            const skeleton = document.createElement('div');
+            skeleton.className = 'reel-item';
+            skeleton.innerHTML = `<div class="skeleton-video"></div>`;
+            container.appendChild(skeleton);
+        }
+    }
+    
+    async function renderReels() {
+        const container = document.getElementById('reelsContainer');
+        if (!container) return;
+        showSkeletonReels();
+        let reelsArray = [...allReels];
+        if (reelsArray.length === 0) {
+            container.innerHTML = '<div style="color:white; text-align:center; padding-top:50vh;">No reels yet</div>';
+            return;
+        }
+        container.innerHTML = '';
+        for (const reel of reelsArray) {
+            const userSnap = await get(ref(db, `users/${reel.userId}`));
+            const user = userSnap.val();
+            const isOwn = reel.userId === currentUser?.uid;
+            const reactionsObj = reel.reactions || {};
+            const totalReactions = Object.values(reactionsObj).reduce((a,b)=>a+b.length, 0);
+            const commentCount = reel.comments?.length || 0;
+            const repostCount = reel.repostCount || 0;
+            
+            const div = document.createElement('div');
+            div.className = 'reel-item';
+            div.innerHTML = `
+                <video src="${reel.media}" playsinline muted loop preload="auto"></video>
+                <div class="action-bar">
+                    <img class="action-avatar" src="${user?.profilePic || 'https://ui-avatars.com/api/'}" onclick="window.location.href='view-profile.html?uid=${reel.userId}'">
+                    <button class="action-btn like-reel" data-post-id="${reel.id}">❤️ <span>${totalReactions}</span></button>
+                    <button class="action-btn comment-reel" data-post-id="${reel.id}">💬 <span>${commentCount}</span></button>
+                    ${!isOwn ? `<button class="action-btn repost-reel" data-post-id="${reel.id}">🔁 <span>${repostCount}</span></button>` : ''}
+                </div>
+                <div class="reel-caption">${escapeHTML(reel.content || '')}</div>
+            `;
+            container.appendChild(div);
+            // Ensure video loads and tries to play
+            const video = div.querySelector('video');
+            video.load(); // force load
+            playVideoIfNeeded(video);
+            const likeBtn = div.querySelector('.like-reel');
+            await updateLikeButtonDisplay(likeBtn, reel.id);
+        }
+        attachReelEvents();
+        setupAutoplay();
+    }
+    
+    function attachReelEvents() {
+        // Like button: long press for reactions
+        document.querySelectorAll('.like-reel').forEach(btn => {
+            let pressTimer = null;
+            const startPress = () => {
+                pressTimer = setTimeout(() => {
+                    const postId = btn.dataset.postId;
+                    get(ref(db, `posts/${postId}`)).then(res => {
+                        const post = res.val();
+                        if (post) showReactionPicker(btn, postId, post.userId);
+                    });
+                }, 500);
+            };
+            const cancelPress = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+            btn.addEventListener('mousedown', startPress);
+            btn.addEventListener('mouseup', cancelPress);
+            btn.addEventListener('mouseleave', cancelPress);
+            btn.addEventListener('touchstart', startPress);
+            btn.addEventListener('touchend', cancelPress);
+            // Click for simple like (if no long press)
+            btn.addEventListener('click', async (e) => {
+                if (pressTimer) return;
+                const postId = btn.dataset.postId;
+                const snap = await get(ref(db, `posts/${postId}`));
+                const post = snap.val();
+                if (!post) return;
+                const reactionsObj = post.reactions || {};
+                let hasReaction = false;
+                for (let [type, users] of Object.entries(reactionsObj)) {
+                    if (users.includes(currentUser.uid)) {
+                        hasReaction = true;
+                        const newUsers = users.filter(id => id !== currentUser.uid);
+                        if (newUsers.length === 0) delete reactionsObj[type];
+                        else reactionsObj[type] = newUsers;
+                        await update(ref(db, `posts/${postId}`), { reactions: reactionsObj });
+                        break;
+                    }
+                }
+                if (!hasReaction) {
+                    await addReaction(postId, 'love', post.userId);
+                }
+                await updateLikeButtonDisplay(btn, postId);
+            });
+        });
+        // Comment button
+        document.querySelectorAll('.comment-reel').forEach(btn => {
+            btn.onclick = async () => {
+                const postId = btn.dataset.postId;
+                const comment = prompt("Write a comment:");
+                if (comment) {
+                    const snap = await get(ref(db, `posts/${postId}`));
+                    const post = snap.val();
+                    if (post) await addComment(postId, comment, post.userId);
+                    const newSnap = await get(ref(db, `posts/${postId}`));
+                    const newPost = newSnap.val();
+                    btn.innerHTML = `💬 <span>${newPost.comments?.length || 0}</span>`;
+                }
+            };
+        });
+        // Repost button
+        document.querySelectorAll('.repost-reel').forEach(btn => {
+            btn.onclick = async () => {
+                const postId = btn.dataset.postId;
+                const snap = await get(ref(db, `posts/${postId}`));
+                const post = snap.val();
+                if (post) {
+                    await repostPost(post, post.userId);
+                    const newSnap = await get(ref(db, `posts/${postId}`));
+                    const newPost = newSnap.val();
+                    btn.innerHTML = `🔁 <span>${newPost.repostCount || 0}</span>`;
+                }
+            };
+        });
+    }
+    
+    function listenToReels() {
+        const postsRef = ref(db, 'posts');
+        onValue(postsRef, (snap) => {
+            const posts = snap.val() || {};
+            const videos = Object.values(posts).filter(p => p.mediaType === 'video' && p.privacy === 'public');
+            allReels = videos.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+            renderReels();
+        });
+    }
+    
+    async function loadUserData(user) {
+        const userSnap = await get(ref(db, `users/${user.uid}`));
+        if (userSnap.exists()) currentUser = { uid: user.uid, ...userSnap.val() };
+        else {
+            currentUser = { uid: user.uid, displayName: user.email.split('@')[0], username: user.email.split('@')[0], profilePic: 'https://ui-avatars.com/api/', friends: [] };
+            await set(ref(db, `users/${user.uid}`), currentUser);
+        }
+        window.currentUser = currentUser;
+        listenToReels();
+    }
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (user) await loadUserData(user);
+        else window.location.href = 'login.html';
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SocialNest • Chats</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f0f2f5; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .header { background: white; padding: 12px 20px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid #e4e6eb; }
+        .back-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
+        .main { display: flex; flex: 1; overflow: hidden; position: relative; }
+        .sidebar { width: 320px; background: white; border-right: 1px solid #e4e6eb; display: flex; flex-direction: column; overflow-y: auto; transition: transform 0.25s; z-index: 10; }
+        .sidebar.collapsed { transform: translateX(-100%); position: absolute; height: 100%; }
+        .chat-area.expanded { width: 100%; }
+        .sidebar-header { padding: 16px 20px; border-bottom: 1px solid #e4e6eb; display: flex; justify-content: space-between; position: sticky; top: 0; background: white; }
+        .friend-list { padding: 0 8px; }
+        .friend-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; cursor: pointer; border-radius: 12px; margin: 4px 0; }
+        .friend-item:hover { background: #f0f2f5; }
+        .friend-item.active { background: #e7f3ff; }
+        .friend-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+        .friend-name { font-weight: 600; }
+        .friend-username { font-size: 12px; color: #65676b; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: #f8f9fc; }
+        .chat-header { background: indigo; padding: 12px 20px; border-bottom: 1px solid #e4e6eb; display: flex; justify-content: space-between; align-items: center; }
+        .chat-user-info { display: flex; align-items: center; gap: 12px; }
+        .chat-avatar { width: 48px; height: 48px; border-radius: 50%; }
+        .three-dot-menu { background: none; border: none; font-size: 15px; cursor: pointer; padding: 8px; border-radius: 50%; }
+        .chat-menu-dropdown { position: absolute; top: 70px; right: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 220px; z-index: 200; display: none; flex-direction: column; }
+        .chat-menu-dropdown.show { display: flex; }
+        .menu-item { padding: 12px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .menu-item:hover { background: #f0f2f5; }
+        .menu-item.danger { color: #dc2626; }
+        .messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; background-size: cover; background-position: center; transition: 0.2s; }
+        .message { max-width: 70%; margin-bottom: 12px; padding: 8px 14px; border-radius: 18px; }
+        .message-sent { background: #0084ff; color: white; align-self: flex-end; }
+        .message-received { background: #e4e6eb; align-self: flex-start; }
+        .message-media { max-width: 200px; max-height: 200px; border-radius: 12px; margin-top: 6px; }
+        .input-area { background: white; padding: 12px 16px; border-top: 1px solid #e4e6eb; display: flex; gap: 8px; align-items: center; }
+        .input-area input { flex: 1; background: #f0f2f5; border: none; border-radius: 20px; padding: 10px 16px; outline: none; }
+        .send-btn, .attach-btn { background: none; border: none; font-size: 22px; cursor: pointer; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .send-btn { background: #0084ff; color: white; }
+        .floating-sidebar-btn { position: fixed; left: 16px; bottom: 80px; background: rgb(0,0,0,0.3); color: white; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 150; border: none; }
+        .floating-sidebar-btn.hide { display: none; }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 10px 20px; border-radius: 40px; opacity: 0; transition: 0.2s; z-index: 1000; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; display: none; }
+        .modal-content { background: white; border-radius: 20px; width: 90%; max-width: 400px; padding: 24px; }
+        .modal-content textarea, .modal-content input { width: 100%; padding: 12px; margin: 12px 0; border: 1px solid #ddd; border-radius: 12px; }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 16px; }
+        .modal-buttons button { flex: 1; padding: 10px; border: none; border-radius: 30px; cursor: pointer; }
+        .wallpaper-option { display: inline-block; width: 40px; height: 40px; border-radius: 12px; margin: 6px; cursor: pointer; border: 2px solid transparent; }
+        .wallpaper-option.selected { border-color: #0084ff; }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .loading-overlay.hide { display: none; }
+        .spinner { width: 50px; height: 50px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .all-call { background: none; border: none; font-size: 15px; cursor: pointer; padding: 8px; border-radius: 50%; }
+        .call-menu-dropdown { position: absolute; top: 70px; right: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 220px; z-index: 200; display: none; flex-direction: column; }
+        .call-menu-dropdown.show { display: flex; }
+        
+        /* ========== FACEBOOK-STYLE SKELETON LOADING ========== */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f2f5 25%, #e4e6eb 50%, #f0f2f5 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #e4e6eb 25%, #d0d4d9 50%, #e4e6eb 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .skeleton-text {
+            height: 14px;
+            margin: 8px 0;
+            border-radius: 7px;
+        }
+        
+        .skeleton-name {
+            width: 120px;
+            height: 16px;
+        }
+        
+        .skeleton-username {
+            width: 80px;
+            height: 12px;
+            margin-top: 6px;
+        }
+        
+        .skeleton-message {
+            max-width: 70%;
+            height: 40px;
+            margin-bottom: 12px;
+            border-radius: 18px;
+        }
+        
+        .skeleton-message-sent {
+            align-self: flex-end;
+            background: linear-gradient(90deg, #b0d4ff 25%, #90c0f0 50%, #b0d4ff 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .skeleton-message-received {
+            align-self: flex-start;
+            background: linear-gradient(90deg, #e4e6eb 25%, #d0d4d9 50%, #e4e6eb 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .skeleton-chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+        }
+        
+        .content-loaded {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .send-btn.loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .send-btn.loading i {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .friend-item-skeleton {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            margin: 4px 0;
+        }
+        /* ========== END SKELETON LOADING ========== */
+    </style>
+</head>
+<body>
+
+<!-- Full page loading overlay (initial) -->
+<div class="loading-overlay" id="loadingOverlay"><div class="spinner"></div></div>
+
+<div class="header">
+    <button class="back-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i></button>
+    <h2><i class="fas fa-comment-dots"></i> Chats</h2>
+</div>
+
+<div class="main">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span><i class="fas fa-users"></i> Friends</span>
+            <button id="refreshBtn"><i class="fas fa-sync-alt"></i></button>
+        </div>
+        <div id="friendsList" class="friend-list"></div>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+        <div class="chat-header" id="chatHeader" style="display: none;">
+            <div class="chat-user-info">
+                <img id="chatAvatar" class="chat-avatar" src="">
+                <div><strong id="chatName"></strong><br><span id="chatUsername" style="font-size:12px;color:#65676b;"></span></div>
+            </div>
+            
+            <div>
+                <button class="all-call" id="allCall">
+                    <i class="fas fa-phone"></i>
+                </button>
+                <div class="chat-menu-dropdown" id="callDropMenu">
+                    <div id="voiceCall" class="menu-item"><i class="fas fa-phone"></i> Voice call</div>
+                    <div id="videoCall" class="menu-item"><i class="fas fa-video"></i> Video call</div>
+                </div>
+            </div>
+            
+            <button class="three-dot-menu" id="threeDotBtn"><i class="fas fa-ellipsis-v"></i></button>
+            <div class="chat-menu-dropdown" id="chatMenuDropdown">
+                <div class="menu-item" id="blockUserBtn"><i class="fas fa-ban"></i> Block user</div>
+                <div class="menu-item" id="reportUserBtn"><i class="fas fa-flag"></i> Report user</div>
+                <div class="menu-item" id="changeWallpaperBtn"><i class="fas fa-palette"></i> Change wallpaper</div>
+            </div>
+        </div>
+
+        <!-- Skeleton for chat header when loading -->
+        <div id="chatHeaderSkeleton" class="skeleton-chat-header" style="display: none; padding: 12px 20px; background: indigo;">
+            <div class="skeleton-avatar" style="width: 48px; height: 48px;"></div>
+            <div style="flex: 1;">
+                <div class="skeleton skeleton-name" style="width: 150px; background: rgba(255,255,255,0.3);"></div>
+                <div class="skeleton skeleton-username" style="width: 100px; margin-top: 6px; background: rgba(255,255,255,0.2);"></div>
+            </div>
+        </div>
+
+        <!-- Wallpaper Modal -->
+        <div id="wallpaperModal" style="position: fixed; bottom: 80px; right: 20px; background: white; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 16px; width: 260px; z-index: 300; display: none; flex-direction: column;">
+            <div style="font-weight: 600; margin-bottom: 12px;">Chat Wallpaper</div>
+            <div>
+                <div class="wallpaper-option" style="background: #f8f9fc;" data-wall="default"></div>
+                <div class="wallpaper-option" style="background: #fee2e2;" data-wall="red"></div>
+                <div class="wallpaper-option" style="background: #dcfce7;" data-wall="green"></div>
+                <div class="wallpaper-option" style="background: #dbeafe;" data-wall="blue"></div>
+            </div>
+            <div class="custom-wallpaper-input">
+                <button id="uploadWallpaperBtn" style="background: #e4e6eb; border: none; padding: 6px 12px; border-radius: 20px; width: 100%; margin-top: 8px;"><i class="fas fa-upload"></i> Upload image</button>
+                <input type="file" id="customWallpaperUpload" accept="image/*" style="display: none;">
+            </div>
+            <button id="closeWallpaperBtn" style="margin-top: 12px; background: none; border: none; color: #65676b;">Cancel</button>
+        </div>
+
+        <div class="messages" id="messages"></div>
+        <div class="input-area" id="inputArea" style="display: none;">
+            <button class="attach-btn" id="attachBtn"><i class="fas fa-plus"></i></button>
+            <input type="text" id="messageInput" placeholder="Aa">
+            <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <input type="file" id="mediaUpload" accept="image/*,video/*" style="display: none;">
+    </div>
+</div>
+
+<button class="floating-sidebar-btn hide" id="floatingSidebarBtn"><i class="fas fa-bars"></i></button>
+<div id="toastMsg" class="toast"></div>
+
+<!-- Report Modal -->
+<div id="reportModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-flag"></i> Report User</h3>
+        <input type="text" id="reportReason" placeholder="Reason (e.g., Harassment, Spam)" required>
+        <textarea id="reportDetails" rows="3" placeholder="Additional details (optional)"></textarea>
+        <div class="modal-buttons">
+            <button id="submitReportBtn" style="background:#dc2626; color:white;">Submit Report</button>
+            <button id="cancelReportBtn" style="background:#e4e6eb;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, push, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    window.db = db;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.set = set;
+    window.update = update;
+    
+    let currentUser = null;
+    let currentFriend = null;
+    let messageUnsub = null;
+    
+    // ========== SKELETON LOADING FUNCTIONS ==========
+    
+    function showFriendsSkeleton() {
+        const container = document.getElementById('friendsList');
+        let skeletons = '';
+        for(let i = 0; i < 5; i++) {
+            skeletons += `
+                <div class="friend-item-skeleton">
+                    <div class="skeleton-avatar"></div>
+                    <div style="flex: 1;">
+                        <div class="skeleton skeleton-name"></div>
+                        <div class="skeleton skeleton-username"></div>
+                    </div>
+                </div>
+            `;
+        }
+        container.innerHTML = skeletons;
+    }
+    
+    function showMessagesSkeleton() {
+        const container = document.getElementById('messages');
+        let skeletons = '';
+        for(let i = 0; i < 6; i++) {
+            const isSent = i % 2 === 0;
+            skeletons += `<div class="skeleton-message ${isSent ? 'skeleton-message-sent' : 'skeleton-message-received'}" style="width: ${Math.random() * 40 + 40}%;"></div>`;
+        }
+        container.innerHTML = skeletons;
+        container.classList.add('content-loaded');
+    }
+    
+    function setSendButtonLoading(isLoading) {
+        const sendBtn = document.getElementById('sendBtn');
+        if(isLoading) {
+            sendBtn.classList.add('loading');
+            sendBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+        } else {
+            sendBtn.classList.remove('loading');
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
+    }
+    
+    function showChatHeaderSkeleton(show) {
+        const realHeader = document.getElementById('chatHeader');
+        const skeletonHeader = document.getElementById('chatHeaderSkeleton');
+        if(show) {
+            if(realHeader) realHeader.style.display = 'none';
+            if(skeletonHeader) skeletonHeader.style.display = 'flex';
+        } else {
+            if(realHeader) realHeader.style.display = 'flex';
+            if(skeletonHeader) skeletonHeader.style.display = 'none';
+        }
+    }
+    
+    // ========== END SKELETON FUNCTIONS ==========
+    
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        t.style.background = isError ? '#b91c1c' : '#1e293b';
+        setTimeout(() => t.style.opacity = '0', 2500);
+    }
+    
+    async function checkBanned() {
+        const userSnap = await get(ref(db, `users/${currentUser.uid}/banned`));
+        if (userSnap.val() === true) {
+            showToast("Your account has been banned. You will be logged out.", true);
+            setTimeout(() => {
+                auth.signOut();
+                window.location.href = 'login.html';
+            }, 2000);
+            return true;
+        }
+        return false;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+    
+    // Sidebar collapse/expand
+    const sidebar = document.getElementById('sidebar');
+    const chatAreaDiv = document.getElementById('chatArea');
+    const floatingBtn = document.getElementById('floatingSidebarBtn');
+    function collapseSidebar() {
+        if (!sidebar.classList.contains('collapsed')) {
+            sidebar.classList.add('collapsed');
+            chatAreaDiv.classList.add('expanded');
+            floatingBtn.classList.remove('hide');
+        }
+    }
+    function expandSidebar() {
+        if (sidebar.classList.contains('collapsed')) {
+            sidebar.classList.remove('collapsed');
+            chatAreaDiv.classList.remove('expanded');
+            floatingBtn.classList.add('hide');
+        }
+    }
+    floatingBtn.addEventListener('click', expandSidebar);
+    
+    async function ensureBlockedArray() {
+        const userRef = ref(db, `users/${currentUser.uid}`);
+        const snap = await get(userRef);
+        const userData = snap.val();
+        if (!userData.blockedUsers) {
+            await update(userRef, { blockedUsers: [] });
+            currentUser.blockedUsers = [];
+        } else {
+            currentUser.blockedUsers = userData.blockedUsers;
+        }
+    }
+    
+    async function blockUser() {
+        if (!currentFriend) return;
+        if (currentFriend.uid === currentUser.uid) return;
+        if (!confirm(`Block ${currentFriend.fullName}? You will no longer receive messages.`)) return;
+        try {
+            await ensureBlockedArray();
+            if (!currentUser.blockedUsers.includes(currentFriend.uid)) {
+                const newBlocked = [...currentUser.blockedUsers, currentFriend.uid];
+                await update(ref(db, `users/${currentUser.uid}`), { blockedUsers: newBlocked });
+                currentUser.blockedUsers = newBlocked;
+                showToast(`${currentFriend.fullName} blocked`);
+                document.getElementById('messageInput').disabled = true;
+                document.getElementById('sendBtn').disabled = true;
+                document.getElementById('attachBtn').disabled = true;
+                
+                // Update menu button text
+                const blockMenuItem = document.getElementById('blockUserBtn');
+                if (blockMenuItem) blockMenuItem.innerHTML = '<i class="fas fa-check"></i> Unblock user';
+            } else {
+                showToast("Already blocked", true);
+            }
+        } catch (err) {
+            console.error("Block error:", err);
+            showToast("Block failed: " + err.message, true);
+        }
+    }
+    
+    // Unblock a user
+    async function unblockUser() {
+        if (!currentFriend) return;
+        if (!confirm(`Unblock ${currentFriend.fullName}? You will be able to chat again.`)) return;
+        
+        try {
+            await ensureBlockedArray();
+            if (currentUser.blockedUsers.includes(currentFriend.uid)) {
+                const newBlocked = currentUser.blockedUsers.filter(uid => uid !== currentFriend.uid);
+                await update(ref(db, `users/${currentUser.uid}`), { blockedUsers: newBlocked });
+                currentUser.blockedUsers = newBlocked;
+                showToast(`${currentFriend.fullName} unblocked`);
+                
+                // Re-enable input fields
+                document.getElementById('messageInput').disabled = false;
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('attachBtn').disabled = false;
+                
+                // Update menu button text
+                const blockMenuItem = document.getElementById('blockUserBtn');
+                if (blockMenuItem) blockMenuItem.innerHTML = '<i class="fas fa-ban"></i> Block user';
+            } else {
+                showToast("User is not blocked", true);
+            }
+        } catch (err) {
+            console.error("Unblock error:", err);
+            showToast("Unblock failed: " + err.message, true);
+        }
+    }
+    
+    // REPORT MODAL
+    const reportModal = document.getElementById('reportModal');
+    document.getElementById('reportUserBtn').addEventListener('click', () => {
+        if (!currentFriend) return;
+        document.getElementById('reportReason').value = '';
+        document.getElementById('reportDetails').value = '';
+        reportModal.style.display = 'flex';
+        document.getElementById('chatMenuDropdown').classList.remove('show');
+    });
+    document.getElementById('cancelReportBtn').addEventListener('click', () => {
+        reportModal.style.display = 'none';
+    });
+    document.getElementById('submitReportBtn').addEventListener('click', async () => {
+        const reason = document.getElementById('reportReason').value.trim();
+        if (!reason) {
+            showToast("Please provide a reason", true);
+            return;
+        }
+        const details = document.getElementById('reportDetails').value.trim();
+        reportModal.style.display = 'none';
+        try {
+            const chatId = [currentUser.uid, currentFriend.uid].sort().join('_');
+            const msgsSnap = await get(ref(db, `messages/${chatId}`));
+            let lastMessages = [];
+            if (msgsSnap.exists()) {
+                const all = Object.values(msgsSnap.val());
+                lastMessages = all.sort((a,b)=>b.timestamp - a.timestamp).slice(0,5).map(m => ({
+                    text: m.text || (m.media ? (m.mediaType === 'image' ? '[Image]' : '[Video]') : ''),
+                    from: m.from === currentUser.uid ? 'me' : currentFriend.username,
+                    time: new Date(m.timestamp).toLocaleString()
+                }));
+            }
+            const reportData = {
+                reportedUserId: currentFriend.uid,
+                reportedUserName: currentFriend.fullName,
+                reportedByUserId: currentUser.uid,
+                reportedByUserName: currentUser.fullName || currentUser.displayName,
+                reason: reason,
+                details: details,
+                lastMessages: lastMessages,
+                createdAt: new Date().toISOString(),
+                status: "pending"
+            };
+            await push(ref(db, 'reports'), reportData);
+            showToast("Report sent to admin. Thank you!");
+        } catch (err) {
+            console.error("Report error:", err);
+            showToast("Failed to send report: " + err.message, true);
+        }
+    });
+    
+    // WALLPAPER
+    function applyWallpaper(friendId) {
+        const messagesDiv = document.getElementById('messages');
+        const saved = localStorage.getItem(`wallpaper_${currentUser.uid}_${friendId}`);
+        if (saved && saved !== 'default') {
+            if (saved.startsWith('http') || saved.startsWith('data:')) {
+                messagesDiv.style.backgroundImage = `url(${saved})`;
+                messagesDiv.style.backgroundSize = 'cover';
+            } else {
+                const colors = { red: '#fee2e2', green: '#dcfce7', blue: '#dbeafe' };
+                messagesDiv.style.backgroundImage = 'none';
+                messagesDiv.style.backgroundColor = colors[saved] || '#f8f9fc';
+            }
+        } else {
+            messagesDiv.style.backgroundImage = 'none';
+            messagesDiv.style.backgroundColor = '#f8f9fc';
+        }
+    }
+    function setWallpaper(friendId, value) {
+        localStorage.setItem(`wallpaper_${currentUser.uid}_${friendId}`, value);
+        applyWallpaper(friendId);
+    }
+    
+    // Wallpaper UI
+    const wallpaperModal = document.getElementById('wallpaperModal');
+    document.getElementById('changeWallpaperBtn').addEventListener('click', () => {
+        document.getElementById('chatMenuDropdown').classList.remove('show');
+        wallpaperModal.style.display = 'flex';
+    });
+    document.querySelectorAll('.wallpaper-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+            const wall = opt.dataset.wall;
+            if (currentFriend) setWallpaper(currentFriend.uid, wall);
+            wallpaperModal.style.display = 'none';
+        });
+    });
+    document.getElementById('uploadWallpaperBtn').addEventListener('click', () => {
+        document.getElementById('customWallpaperUpload').click();
+    });
+    document.getElementById('customWallpaperUpload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                if (currentFriend) setWallpaper(currentFriend.uid, ev.target.result);
+                wallpaperModal.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        } else showToast("Please select an image", true);
+    });
+    document.getElementById('closeWallpaperBtn').addEventListener('click', () => {
+        wallpaperModal.style.display = 'none';
+    });
+    
+    // Send message with media - WITH LOADING STATE
+    async function sendMessage(text, mediaDataURL = null, mediaType = null) {
+        if (await checkBanned()) return;
+        
+        if (!currentFriend) return;
+        if (currentUser.blockedUsers?.includes(currentFriend.uid)) {
+            showToast("You blocked this user.", true);
+            return;
+        }
+        const friendSnap = await get(ref(db, `users/${currentFriend.uid}`));
+        const friendData = friendSnap.val();
+        if (friendData?.blockedUsers?.includes(currentUser.uid)) {
+            showToast("You are blocked by this user.", true);
+            return;
+        }
+        if (!text && !mediaDataURL) return;
+        
+        setSendButtonLoading(true);
+        
+        const chatId = [currentUser.uid, currentFriend.uid].sort().join('_');
+        const msgObj = { from: currentUser.uid, to: currentFriend.uid, timestamp: Date.now() };
+        if (text) msgObj.text = text;
+        if (mediaDataURL) { msgObj.media = mediaDataURL; msgObj.mediaType = mediaType; }
+        
+        try {
+            await push(ref(db, `messages/${chatId}`), msgObj);
+            if (text) document.getElementById('messageInput').value = '';
+        } catch (err) {
+            showToast("Failed to send message", true);
+        } finally {
+            setSendButtonLoading(false);
+        }
+    }
+    
+    function loadMessages() {
+        if (messageUnsub) messageUnsub();
+        if (!currentFriend) return;
+        
+        showMessagesSkeleton();
+        
+        const chatId = [currentUser.uid, currentFriend.uid].sort().join('_');
+        messageUnsub = onValue(ref(db, `messages/${chatId}`), (snap) => {
+            const msgs = snap.val();
+            const container = document.getElementById('messages');
+            if (!msgs) { 
+                container.innerHTML = '<div class="empty-state">No messages yet. Start a conversation!</div>';
+                return; 
+            }
+            const arr = Object.values(msgs).sort((a,b)=>a.timestamp-b.timestamp);
+            container.innerHTML = '';
+            arr.forEach(m => {
+                const isOwn = m.from === currentUser.uid;
+                const div = document.createElement('div');
+                div.className = `message ${isOwn ? 'message-sent' : 'message-received'}`;
+                if (m.text) div.textContent = m.text;
+                if (m.media) {
+                    const mediaEl = m.mediaType === 'image' ? document.createElement('img') : document.createElement('video');
+                    mediaEl.src = m.media;
+                    mediaEl.className = 'message-media';
+                    if (m.mediaType === 'video') mediaEl.controls = true;
+                    div.appendChild(mediaEl);
+                }
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+            container.classList.add('content-loaded');
+        });
+    }
+    
+    async function selectFriend(friendId, friendData) {
+        showChatHeaderSkeleton(true);
+        showMessagesSkeleton();
+        
+        currentFriend = {
+            uid: friendId,
+            fullName: friendData.fullName || friendData.displayName || friendData.username,
+            username: friendData.username,
+            profilePic: friendData.profilePic
+        };
+        window.currentFriend = currentFriend;
+        
+        await ensureBlockedArray();
+        const isBlocked = currentUser.blockedUsers.includes(friendId);
+        
+        setTimeout(() => {
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('inputArea').style.display = 'flex';
+            document.getElementById('chatAvatar').src = currentFriend.profilePic || 'https://ui-avatars.com/api/?background=667eea&color=fff';
+            document.getElementById('chatName').innerText = currentFriend.fullName;
+            document.getElementById('chatUsername').innerText = '@'+currentFriend.username;
+            
+            // Update menu button text based on block status
+            const blockMenuItem = document.getElementById('blockUserBtn');
+            if (blockMenuItem) {
+                blockMenuItem.innerHTML = isBlocked ? '<i class="fas fa-check"></i> Unblock user' : '<i class="fas fa-ban"></i> Block user';
+            }
+            
+            const msgInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const attachBtn = document.getElementById('attachBtn');
+            if (isBlocked) {
+                msgInput.disabled = true; sendBtn.disabled = true; attachBtn.disabled = true;
+                showToast("You blocked this user. Unblock from menu to chat.", true);
+            } else {
+                msgInput.disabled = false; sendBtn.disabled = false; attachBtn.disabled = false;
+            }
+            
+            showChatHeaderSkeleton(false);
+            
+            loadMessages();
+            applyWallpaper(friendId);
+            collapseSidebar();
+        }, 300);
+    }
+    
+    async function loadFriends() {
+        const container = document.getElementById('friendsList');
+        if (!currentUser) return;
+        
+        showFriendsSkeleton();
+        
+        try {
+            const userSnap = await get(ref(db, `users/${currentUser.uid}`));
+            const friendsIds = userSnap.val()?.friends || [];
+            if (friendsIds.length === 0) {
+                container.innerHTML = '<div class="empty-state">No friends yet. Add some friends to chat!</div>';
+                return;
+            }
+            let html = '';
+            for (const id of friendsIds) {
+                const fSnap = await get(ref(db, `users/${id}`));
+                const f = fSnap.val();
+                if (f) {
+                    html += `
+                        <div class="friend-item" data-id="${id}">
+                            <img class="friend-avatar" src="${f.profilePic || 'https://ui-avatars.com/api/?background=667eea&color=fff'}">
+                            <div><div class="friend-name">${escapeHtml(f.fullName || f.displayName)}</div>
+                            <div class="friend-username">@${escapeHtml(f.username)}</div></div>
+                        </div>
+                    `;
+                }
+            }
+            container.innerHTML = html;
+            document.querySelectorAll('.friend-item').forEach(el => {
+                el.addEventListener('click', async () => {
+                    const fid = el.dataset.id;
+                    const fSnap = await get(ref(db, `users/${fid}`));
+                    if (fSnap.exists()) selectFriend(fid, fSnap.val());
+                });
+            });
+        } catch(e) { 
+            console.error(e); 
+            container.innerHTML = '<div class="empty-state">Error loading friends. Pull to refresh.</div>';
+        }
+    }
+    
+    function setupEvents() {
+        document.getElementById('sendBtn').onclick = () => {
+            const input = document.getElementById('messageInput');
+            if (input.value.trim()) sendMessage(input.value.trim());
+        };
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('sendBtn').click();
+        });
+        document.getElementById('refreshBtn').addEventListener('click', loadFriends);
+        document.getElementById('attachBtn').onclick = () => document.getElementById('mediaUpload').click();
+        document.getElementById('mediaUpload').onchange = (e) => {
+            if (e.target.files[0]) {
+                const file = e.target.files[0];
+                const type = file.type.split('/')[0];
+                if (type !== 'image' && type !== 'video') return showToast("Only images/videos", true);
+                
+                setSendButtonLoading(true);
+                
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    sendMessage('', ev.target.result, type);
+                    setSendButtonLoading(false);
+                };
+                reader.onerror = () => {
+                    showToast("Error processing file", true);
+                    setSendButtonLoading(false);
+                };
+                reader.readAsDataURL(file);
+            }
+            e.target.value = '';
+        };
+        const threeDot = document.getElementById('threeDotBtn');
+        const menu = document.getElementById('chatMenuDropdown');
+        threeDot.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); };
+        document.addEventListener('click', () => menu.classList.remove('show'));
+        
+        // Toggle block/unblock based on current status
+        document.getElementById('blockUserBtn').onclick = () => {
+            menu.classList.remove('show');
+            const isBlocked = currentUser?.blockedUsers?.includes(currentFriend?.uid);
+            if (isBlocked) {
+                unblockUser();
+            } else {
+                blockUser();
+            }
+        };
+    }
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const uSnap = await get(ref(db, `users/${user.uid}`));
+            const userData = uSnap.val() || {};
+            currentUser = { uid: user.uid, ...userData };
+            if (!currentUser.fullName) currentUser.fullName = currentUser.displayName || currentUser.username;
+            window.currentUser = currentUser;
+            
+            await ensureBlockedArray();
+            await loadFriends();
+            setupEvents();
+            document.getElementById('loadingOverlay').classList.add('hide');
+            
+            if (window.initCallModule) window.initCallModule();
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+    setTimeout(() => document.getElementById('loadingOverlay')?.classList.add('hide'), 2000);
+</script>
+
+<!-- Voice & Video Call Module (call.js) -->
+<script>
+(function() {
+    let peerConnection = null;
+    let localStream = null;
+    let callActive = false;
+    let callSignalRef = null;
+    let callSignalListener = null;
+    
+    const configuration = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+    };
+    
+    function showCallToast(msg, isError = false) {
+        const toast = document.getElementById('toastMsg');
+        if (toast) {
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            toast.style.background = isError ? '#b91c1c' : '#1e293b';
+            setTimeout(() => toast.style.opacity = '0', 3000);
+        } else alert(msg);
+    }
+    
+    function createIncomingCallModal() {
+        if (document.getElementById('incomingCallModal')) return;
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'incomingCallModal';
+        modalDiv.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); display: none; align-items: center;
+            justify-content: center; z-index: 10000; backdrop-filter: blur(4px);
+        `;
+        modalDiv.innerHTML = `
+            <div style="background: white; border-radius: 32px; width: 280px; padding: 24px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 12px;">📞</div>
+                <h3 id="callerName" style="margin-bottom: 8px;">Incoming Call</h3>
+                <p id="callTypeText" style="color: #65676b; margin-bottom: 24px;">Voice call...</p>
+                <div style="display: flex; gap: 20px; justify-content: center;">
+                    <button id="acceptCallBtn" style="background: #22c55e; border: none; padding: 12px 24px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer;">Accept</button>
+                    <button id="rejectCallBtn" style="background: #ef4444; border: none; padding: 12px 24px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer;">Decline</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+        return modalDiv;
+    }
+    
+    function createActiveCallUI() {
+        if (document.getElementById('activeCallContainer')) return;
+        const container = document.createElement('div');
+        container.id = 'activeCallContainer';
+        container.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1e1e2f; z-index: 10001; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+        `;
+        container.innerHTML = `
+            <div style="position: relative; width: 100%; height: 100%; background: #000;">
+                <video id="remoteVideo" autoplay playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+                <video id="localVideo" autoplay playsinline muted style="position: absolute; bottom: 20px; right: 20px; width: 120px; border-radius: 16px; border: 2px solid white; z-index: 10;"></video>
+                <div style="position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; z-index: 20;">
+                    <button id="endCallBtn" style="background: #ef4444; border: none; padding: 14px 28px; border-radius: 50px; color: white; font-weight: bold; cursor: pointer; font-size: 16px;"><i class="fas fa-phone-slash"></i> End Call</button>
+                </div>
+                <div style="position: absolute; top: 20px; left: 0; right: 0; text-align: center; color: white; background: rgba(0,0,0,0.5); padding: 8px; font-weight: bold;" id="callStatusText">Connecting...</div>
+            </div>
+        `;
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    async function endCall() {
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        if (callSignalRef) {
+            try { await window.set(callSignalRef, null); } catch(e) {}
+            callSignalRef = null;
+        }
+        if (callSignalListener) {
+            callSignalListener();
+            callSignalListener = null;
+        }
+        callActive = false;
+        const activeContainer = document.getElementById('activeCallContainer');
+        if (activeContainer) activeContainer.style.display = 'none';
+        const incomingModal = document.getElementById('incomingCallModal');
+        if (incomingModal) incomingModal.style.display = 'none';
+        showCallToast("Call ended");
+    }
+    
+    async function setupPeerConnection(isCaller, isVideo) {
+        peerConnection = new RTCPeerConnection(configuration);
+        if (localStream) {
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        }
+        peerConnection.ontrack = (event) => {
+            const remoteVideo = document.getElementById('remoteVideo');
+            if (remoteVideo) remoteVideo.srcObject = event.streams[0];
+        };
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate && callSignalRef) {
+                window.push(window.ref(callSignalRef, 'candidates'), event.candidate.toJSON());
+            }
+        };
+        peerConnection.oniceconnectionstatechange = () => {
+            const statusDiv = document.getElementById('callStatusText');
+            if (statusDiv) {
+                if (peerConnection.iceConnectionState === 'connected') statusDiv.textContent = 'Connected';
+                else if (peerConnection.iceConnectionState === 'failed') {
+                    statusDiv.textContent = 'Connection failed';
+                    showCallToast("Connection failed", true);
+                    endCall();
+                } else if (peerConnection.iceConnectionState === 'disconnected') statusDiv.textContent = 'Disconnected';
+            }
+        };
+    }
+    
+    async function startCall(isVideo) {
+        if (!window.currentUser || !window.currentFriend) {
+            showCallToast("Please select a friend first", true);
+            return;
+        }
+        if (callActive) {
+            showCallToast("Call already in progress", true);
+            return;
+        }
+        const constraints = isVideo ? { video: true, audio: true } : { audio: true };
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const localVideo = document.getElementById('localVideo');
+            if (localVideo) localVideo.srcObject = localStream;
+            
+            const callId = [window.currentUser.uid, window.currentFriend.uid].sort().join('_') + '_' + Date.now();
+            callSignalRef = window.ref(window.db, `calls/${callId}`);
+            
+            await setupPeerConnection(true, isVideo);
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            
+            await window.set(callSignalRef, {
+                callerId: window.currentUser.uid,
+                callerName: window.currentUser.fullName,
+                calleeId: window.currentFriend.uid,
+                type: isVideo ? 'video' : 'audio',
+                offer: { type: offer.type, sdp: offer.sdp },
+                status: 'ringing',
+                timestamp: Date.now()
+            });
+            
+            callSignalListener = window.onValue(callSignalRef, (snap) => {
+                const data = snap.val();
+                if (!data) return;
+                if (data.status === 'rejected') {
+                    showCallToast("Call was rejected");
+                    endCall();
+                } else if (data.status === 'answered' && data.answer) {
+                    peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    callActive = true;
+                    document.getElementById('callStatusText').innerText = 'Connected';
+                } else if (data.candidates) {
+                    for (let key in data.candidates) {
+                        peerConnection.addIceCandidate(new RTCIceCandidate(data.candidates[key]));
+                    }
+                }
+            });
+            
+            const activeContainer = createActiveCallUI();
+            activeContainer.style.display = 'flex';
+            document.getElementById('callStatusText').innerText = 'Ringing...';
+            callActive = true;
+        } catch (err) {
+            console.error(err);
+            showCallToast("Cannot access camera/microphone", true);
+            endCall();
+        }
+    }
+    
+    function listenForIncomingCalls() {
+        if (!window.currentUser) return;
+        const callsRef = window.ref(window.db, 'calls');
+        window.onValue(callsRef, (snapshot) => {
+            if (callActive) return;
+            const calls = snapshot.val();
+            if (!calls) return;
+            for (let callId in calls) {
+                const call = calls[callId];
+                if (call.calleeId === window.currentUser.uid && call.status === 'ringing' && !callActive) {
+                    const modal = createIncomingCallModal();
+                    document.getElementById('callerName').innerText = call.callerName;
+                    document.getElementById('callTypeText').innerText = call.type === 'video' ? 'Video call...' : 'Voice call...';
+                    modal.style.display = 'flex';
+                    
+                    const thisCallRef = window.ref(window.db, `calls/${callId}`);
+                    const acceptBtn = document.getElementById('acceptCallBtn');
+                    const rejectBtn = document.getElementById('rejectCallBtn');
+                    
+                    const acceptHandler = async () => {
+                        modal.style.display = 'none';
+                        callSignalRef = thisCallRef;
+                        try {
+                            const constraints = call.type === 'video' ? { video: true, audio: true } : { audio: true };
+                            localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                            const localVideo = document.getElementById('localVideo');
+                            if (localVideo) localVideo.srcObject = localStream;
+                            
+                            await setupPeerConnection(false, call.type === 'video');
+                            await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
+                            const answer = await peerConnection.createAnswer();
+                            await peerConnection.setLocalDescription(answer);
+                            await window.update(thisCallRef, {
+                                answer: { type: answer.type, sdp: answer.sdp },
+                                status: 'answered'
+                            });
+                            callActive = true;
+                            
+                            const activeContainer = createActiveCallUI();
+                            activeContainer.style.display = 'flex';
+                            document.getElementById('callStatusText').innerText = 'Connected';
+                            
+                            window.onValue(thisCallRef, (snap) => {
+                                const data = snap.val();
+                                if (data && data.candidates && peerConnection) {
+                                    for (let key in data.candidates) {
+                                        peerConnection.addIceCandidate(new RTCIceCandidate(data.candidates[key]));
+                                    }
+                                }
+                            });
+                        } catch (err) {
+                            console.error(err);
+                            showCallToast("Failed to accept call", true);
+                            await window.set(thisCallRef, null);
+                            endCall();
+                        }
+                        acceptBtn.removeEventListener('click', acceptHandler);
+                        rejectBtn.removeEventListener('click', rejectHandler);
+                    };
+                    
+                    const rejectHandler = async () => {
+                        modal.style.display = 'none';
+                        await window.update(thisCallRef, { status: 'rejected' });
+                        setTimeout(() => window.set(thisCallRef, null), 1000);
+                        showCallToast("Call declined");
+                        acceptBtn.removeEventListener('click', acceptHandler);
+                        rejectBtn.removeEventListener('click', rejectHandler);
+                    };
+                    
+                    const newAccept = acceptBtn.cloneNode(true);
+                    const newReject = rejectBtn.cloneNode(true);
+                    acceptBtn.parentNode.replaceChild(newAccept, acceptBtn);
+                    rejectBtn.parentNode.replaceChild(newReject, rejectBtn);
+                    newAccept.addEventListener('click', acceptHandler);
+                    newReject.addEventListener('click', rejectHandler);
+                    break;
+                }
+            }
+        });
+    }
+    
+    // Call dropdown menu functionality
+    (function() {
+        const allCallBtn = document.getElementById('allCall');
+        const callDropMenu = document.getElementById('callDropMenu');
+        const voiceCallBtn = document.getElementById('voiceCall');
+        const videoCallBtn = document.getElementById('videoCall');
+        
+        if (!allCallBtn || !callDropMenu) return;
+        
+        allCallBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const chatMenu = document.getElementById('chatMenuDropdown');
+            if (chatMenu) chatMenu.classList.remove('show');
+            callDropMenu.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (callDropMenu.classList.contains('show') &&
+                !callDropMenu.contains(e.target) &&
+                !allCallBtn.contains(e.target)) {
+                callDropMenu.classList.remove('show');
+            }
+        });
+        
+        function startCallWithCheck(isVideo) {
+            callDropMenu.classList.remove('show');
+            if (!window.currentFriend || !window.currentFriend.uid) {
+                showCallToast?.("Please select a friend first", true);
+                return;
+            }
+            if (typeof startCall === 'function') {
+                startCall(isVideo);
+            } else {
+                console.warn("startCall function not ready");
+                showCallToast?.("Call system not ready", true);
+            }
+        }
+        
+        if (voiceCallBtn) {
+            voiceCallBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startCallWithCheck(false);
+            });
+        }
+        
+        if (videoCallBtn) {
+            videoCallBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                startCallWithCheck(true);
+            });
+        }
+    })();
+    
+    window.initCallModule = function() {
+        listenForIncomingCalls();
+        const voiceCallBtn = document.getElementById('voiceCall');
+        const videoCallBtn = document.getElementById('videoCall');
+        const allCallBtn = document.getElementById('allCall');
+        const callDropMenu = document.getElementById('callDropMenu');
+        if (voiceCallBtn) {
+            voiceCallBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (callDropMenu) callDropMenu.classList.remove('show');
+                startCall(false);
+            });
+        }
+        if (videoCallBtn) {
+            videoCallBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (callDropMenu) callDropMenu.classList.remove('show');
+                startCall(true);
+            });
+        }
+        if (allCallBtn) {
+            allCallBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (callDropMenu) callDropMenu.classList.toggle('show');
+            });
+        }
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'endCallBtn') endCall();
+        });
+    };
+    
+    const checkInterval = setInterval(() => {
+        if (window.currentUser && window.currentFriend && window.db) {
+            clearInterval(checkInterval);
+            window.initCallModule();
+        }
+    }, 500);
+})();
+</script>
+</body>
+</html>

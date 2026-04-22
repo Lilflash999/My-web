@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SocialNest • Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            padding-bottom: 20px;
+        }
+        
+       .back-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: rgba(221,221,221,0.6);
+        border: none transparent;
+        color: black;
+        font-size: 10px;
+        width: 44px;
+        height: 44px;
+        border-radius: 30%;
+        cursor: pointer;
+        z-index: 100;
+        backdrop-filter: blur(5px);
+        }
+        
+        .top-bar {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #eef2f6;
+            position: relative;
+        }
+        .logo-area {
+            font-weight: 700;
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .menu-icon {
+            font-size: 26px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            color: #1e293b;
+        }
+        .menu-icon:hover {
+            background: #f0f2f5;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 60px;
+            right: 16px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            width: 240px;
+            z-index: 200;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            border: 1px solid #eef2f6;
+        }
+        .dropdown-menu.show {
+            display: flex;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: #1e293b;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .dropdown-item:hover {
+            background: #f8f9fa;
+        }
+        .dropdown-item.danger {
+            color: #dc2626;
+        }
+        .dropdown-item i {
+            width: 22px;
+            font-size: 16px;
+        }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 150;
+            display: none;
+        }
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .cover-area {
+            position: relative;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+        .cover-overlay {
+            position: absolute;
+            bottom: 12px;
+            right: 12px;
+            background: rgba(0,0,0,0.6);
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            z-index: 2;
+        }
+        .avatar-section {
+            position: relative;
+            padding: 0 16px;
+            margin-top: -60px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .profile-pic-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background: white;
+            cursor: pointer;
+        }
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .edit-avatar-icon {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #e4e6eb;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            cursor: pointer;
+        }
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .edit-profile-btn, .share-profile-btn {
+            background: #e4e6eb;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .profile-info {
+            padding: 16px;
+            border-bottom: 1px solid #eef2f6;
+        }
+        .display-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .username {
+            color: #65676b;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+        .bio {
+            margin-top: 8px;
+            color: #1e293b;
+        }
+        .location, .relationship, .work, .education {
+            margin-top: 6px;
+            color: #65676b;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .stats-row {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eef2f6;
+            background: #fff;
+        }
+        .stat-card {
+            text-align: center;
+            cursor: pointer;
+            flex: 1;
+        }
+        .stat-number {
+            font-weight: 700;
+            font-size: 18px;
+            color: #1e293b;
+        }
+        .stat-label {
+            font-size: 13px;
+            color: #65676b;
+        }
+        .profile-tabs {
+            display: flex;
+            border-bottom: 1px solid #eef2f6;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 14px;
+            background: none;
+            border: none;
+            font-weight: 600;
+            color: #65676b;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+        .tab-btn.active {
+            color: #1877f2;
+        }
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #1877f2;
+        }
+        .posts-grid, .about-grid, .friends-grid {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .friends-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+        }
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #eef2f6;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .post-name {
+            font-weight: 600;
+        }
+        .post-time {
+            font-size: 11px;
+            color: #65676b;
+        }
+        .post-content {
+            margin-bottom: 12px;
+        }
+        .post-media {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+        .post-stats {
+            display: flex;
+            gap: 20px;
+            padding-top: 8px;
+            border-top: 1px solid #eef2f6;
+            font-size: 13px;
+            color: #65676b;
+        }
+        .delete-post-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .about-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #eef2f6;
+            margin-bottom: 12px;
+        }
+        .about-label {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .about-value {
+            color: #1e293b;
+        }
+        .friend-card {
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #eef2f6;
+        }
+        .friend-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 8px;
+        }
+        .friend-name {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 40px;
+            z-index: 1000;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            font-size: 13px;
+        }
+        .hidden-input {
+            display: none;
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+        }
+        .modal-content input, .modal-content textarea, .modal-content select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .confirm-delete-modal {
+            text-align: center;
+        }
+        .confirm-delete-modal button {
+            margin: 12px 8px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: none;
+            font-weight: 600;
+        }
+        #confirmDeleteBtn {
+            background: #dc2626;
+            color: white;
+        }
+        #cancelDeleteBtn {
+            background: #e4e6eb;
+        }
+
+        /* ========== FACEBOOK-STYLE SKELETON LOADING ========== */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f2f5 25%, #e4e6eb 50%, #f0f2f5 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #e4e6eb 25%, #d0d4d9 50%, #e4e6eb 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .skeleton-text {
+            height: 14px;
+            margin: 8px 0;
+            border-radius: 7px;
+        }
+        
+        .skeleton-name {
+            width: 200px;
+            height: 28px;
+            border-radius: 14px;
+        }
+        
+        .skeleton-bio {
+            width: 80%;
+            height: 40px;
+            margin-top: 8px;
+            border-radius: 8px;
+        }
+        
+        .skeleton-cover {
+            height: 200px;
+            background: linear-gradient(90deg, #cbd5e1 25%, #94a3b8 50%, #cbd5e1 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        
+        .skeleton-post {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #eef2f6;
+        }
+        
+        .skeleton-post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .skeleton-post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .skeleton-post-text {
+            flex: 1;
+        }
+        
+        .skeleton-post-line {
+            height: 12px;
+            margin: 6px 0;
+            border-radius: 6px;
+        }
+        
+        .skeleton-friend-card {
+            text-align: center;
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #eef2f6;
+        }
+        
+        .skeleton-friend-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 8px;
+        }
+        
+        .skeleton-friend-name {
+            width: 80px;
+            height: 12px;
+            margin: 0 auto;
+            border-radius: 6px;
+        }
+        
+        .content-loaded {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .skeleton-stat {
+            height: 40px;
+            width: 60px;
+            margin: 0 auto;
+            border-radius: 8px;
+        }
+        /* ========== END SKELETON LOADING ========== */
+    </style>
+</head>
+<body>
+
+<button class="back-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i>back</button>
+
+
+<div class="top-bar">
+    <div class="logo-area"><i class="fas fa-user-circle"></i> SocialNest</div>
+    <div class="menu-icon" id="hamburgerBtn">
+        <i class="fas fa-bars"></i>
+    </div>
+    <div class="dropdown-menu" id="dropdownMenu">
+        <div class="dropdown-item" id="logoutItem">
+            <i class="fas fa-sign-out-alt"></i> Log out
+        </div>
+        <div class="dropdown-item danger" id="deleteAccountItem">
+            <i class="fas fa-trash-alt"></i> Delete account
+        </div>
+    </div>
+</div>
+<div class="menu-overlay" id="menuOverlay"></div>
+
+<div class="profile-container" id="profileContainer">
+    <!-- Cover skeleton -->
+    <div id="coverSkeleton" class="skeleton-cover" style="display: none;"></div>
+    
+    <div class="cover-area" id="coverArea" style="display: none;">
+        <img id="coverImage" class="cover-img">
+        <div class="cover-overlay" id="editCoverBtn"><i class="fas fa-camera"></i></div>
+    </div>
+
+    <div class="avatar-section">
+        <!-- Avatar skeleton -->
+        <div id="avatarSkeleton" class="skeleton-avatar" style="display: none;"></div>
+        
+        <div class="profile-pic-wrapper" id="profilePicWrapper" style="display: none;">
+            <img id="profileImage" class="profile-img" src="https://ui-avatars.com/api/?background=667eea&color=fff">
+            <div class="edit-avatar-icon" id="editAvatarBtn"><i class="fas fa-camera"></i></div>
+        </div>
+        <div class="profile-actions">
+            <button class="edit-profile-btn" id="editProfileBtn"><i class="fas fa-edit"></i> Edit Profile</button>
+            <button class="share-profile-btn" id="shareProfileBtn"><i class="fas fa-share-alt"></i> Share</button>
+        </div>
+    </div>
+
+    <!-- Profile info skeleton -->
+    <div id="profileInfoSkeleton" class="profile-info" style="display: none;">
+        <div class="skeleton skeleton-name"></div>
+        <div class="skeleton skeleton-text" style="width: 40%; margin-top: 8px;"></div>
+        <div class="skeleton skeleton-bio"></div>
+    </div>
+
+    <div class="profile-info" id="profileInfo" style="display: none;">
+        <div class="display-name" id="displayName"></div>
+        <div class="username" id="username"></div>
+        <div class="bio" id="displayBio"></div>
+        <div class="location" id="locationRow"><i class="fas fa-map-marker-alt"></i> <span id="locationValue"></span></div>
+        <div class="relationship" id="relationshipRow"><i class="fas fa-heart"></i> <span id="relationshipValue"></span></div>
+        <div class="work" id="workRow"><i class="fas fa-briefcase"></i> <span id="workValue"></span></div>
+        <div class="education" id="educationRow"><i class="fas fa-graduation-cap"></i> <span id="educationValue"></span></div>
+    </div>
+
+    <!-- Stats skeleton -->
+    <div id="statsSkeleton" class="stats-row" style="display: none;">
+        <div class="stat-card"><div class="skeleton skeleton-stat"></div><div class="stat-label">Posts</div></div>
+        <div class="stat-card"><div class="skeleton skeleton-stat"></div><div class="stat-label">Friends</div></div>
+    </div>
+
+    <div class="stats-row" id="statsRow" style="display: none;">
+        <div class="stat-card" data-tab="posts"><div class="stat-number" id="postCount">0</div><div class="stat-label">Posts</div></div>
+        <div class="stat-card" data-tab="friends"><div class="stat-number" id="friendCount">0</div><div class="stat-label">Friends</div></div>
+    </div>
+
+    <div class="profile-tabs">
+        <button class="tab-btn active" data-tab="posts">Posts</button>
+        <button class="tab-btn" data-tab="about">About</button>
+        <button class="tab-btn" data-tab="friends">Friends</button>
+    </div>
+
+    <!-- Posts skeleton -->
+    <div id="postsSkeleton" class="posts-grid" style="display: none;">
+        <div class="skeleton-post">
+            <div class="skeleton-post-header">
+                <div class="skeleton skeleton-post-avatar"></div>
+                <div class="skeleton-post-text">
+                    <div class="skeleton skeleton-post-line" style="width: 60%;"></div>
+                    <div class="skeleton skeleton-post-line" style="width: 30%;"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-post-line" style="width: 90%;"></div>
+            <div class="skeleton skeleton-post-line" style="width: 70%;"></div>
+            <div class="skeleton skeleton-post-line" style="width: 50%;"></div>
+        </div>
+        <div class="skeleton-post">
+            <div class="skeleton-post-header">
+                <div class="skeleton skeleton-post-avatar"></div>
+                <div class="skeleton-post-text">
+                    <div class="skeleton skeleton-post-line" style="width: 60%;"></div>
+                    <div class="skeleton skeleton-post-line" style="width: 30%;"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-post-line" style="width: 85%;"></div>
+            <div class="skeleton skeleton-post-line" style="width: 65%;"></div>
+        </div>
+        <div class="skeleton-post">
+            <div class="skeleton-post-header">
+                <div class="skeleton skeleton-post-avatar"></div>
+                <div class="skeleton-post-text">
+                    <div class="skeleton skeleton-post-line" style="width: 60%;"></div>
+                    <div class="skeleton skeleton-post-line" style="width: 30%;"></div>
+                </div>
+            </div>
+            <div class="skeleton skeleton-post-line" style="width: 95%;"></div>
+            <div class="skeleton skeleton-post-line" style="width: 75%;"></div>
+            <div class="skeleton skeleton-post-line" style="width: 55%;"></div>
+        </div>
+    </div>
+
+    <!-- Friends skeleton -->
+    <div id="friendsSkeleton" class="friends-grid" style="display: none;">
+        <div class="skeleton-friend-card">
+            <div class="skeleton skeleton-friend-avatar"></div>
+            <div class="skeleton skeleton-friend-name"></div>
+        </div>
+        <div class="skeleton-friend-card">
+            <div class="skeleton skeleton-friend-avatar"></div>
+            <div class="skeleton skeleton-friend-name"></div>
+        </div>
+        <div class="skeleton-friend-card">
+            <div class="skeleton skeleton-friend-avatar"></div>
+            <div class="skeleton skeleton-friend-name"></div>
+        </div>
+        <div class="skeleton-friend-card">
+            <div class="skeleton skeleton-friend-avatar"></div>
+            <div class="skeleton skeleton-friend-name"></div>
+        </div>
+        <div class="skeleton-friend-card">
+            <div class="skeleton skeleton-friend-avatar"></div>
+            <div class="skeleton skeleton-friend-name"></div>
+        </div>
+        <div class="skeleton-friend-card">
+            <div class="skeleton skeleton-friend-avatar"></div>
+            <div class="skeleton skeleton-friend-name"></div>
+        </div>
+    </div>
+
+    <!-- About skeleton -->
+    <div id="aboutSkeleton" class="about-grid" style="display: none;">
+        <div class="about-item"><div class="about-label"><div class="skeleton skeleton-text" style="width: 40px;"></div></div><div class="about-value"><div class="skeleton skeleton-text" style="width: 80%;"></div></div></div>
+        <div class="about-item"><div class="about-label"><div class="skeleton skeleton-text" style="width: 40px;"></div></div><div class="about-value"><div class="skeleton skeleton-text" style="width: 60%;"></div></div></div>
+        <div class="about-item"><div class="about-label"><div class="skeleton skeleton-text" style="width: 40px;"></div></div><div class="about-value"><div class="skeleton skeleton-text" style="width: 70%;"></div></div></div>
+        <div class="about-item"><div class="about-label"><div class="skeleton skeleton-text" style="width: 40px;"></div></div><div class="about-value"><div class="skeleton skeleton-text" style="width: 50%;"></div></div></div>
+        <div class="about-item"><div class="about-label"><div class="skeleton skeleton-text" style="width: 40px;"></div></div><div class="about-value"><div class="skeleton skeleton-text" style="width: 65%;"></div></div></div>
+    </div>
+
+    <div id="postsContainer" class="posts-grid" style="display: none;"></div>
+    <div id="aboutContainer" class="about-grid" style="display: none;"></div>
+    <div id="friendsContainer" class="friends-grid" style="display: none;"></div>
+</div>
+
+<div id="toastMsg" class="toast"></div>
+
+<input type="file" id="profileImageUpload" accept="image/*" class="hidden-input">
+<input type="file" id="coverImageUpload" accept="image/*" class="hidden-input">
+
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h3>Edit Profile</h3>
+        <input type="text" id="editFullName" placeholder="Full Name">
+        <input type="text" id="editUsername" placeholder="Username (without @)">
+        <textarea id="editBio" placeholder="Bio" rows="3"></textarea>
+        <input type="text" id="editLocation" placeholder="Location">
+        <input type="text" id="editWork" placeholder="Work">
+        <input type="text" id="editEducation" placeholder="Education">
+        <select id="editRelationship">
+            <option value="">Select relationship</option>
+            <option value="single">Single</option>
+            <option value="in a relationship">In a relationship</option>
+            <option value="engaged">Engaged</option>
+            <option value="married">Married</option>
+            <option value="its complicated">It's complicated</option>
+        </select>
+        <button id="saveProfileChanges">Save</button>
+        <button id="closeEditModal">Cancel</button>
+    </div>
+</div>
+
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content confirm-delete-modal">
+        <h3><i class="fas fa-exclamation-triangle"></i> Delete Account</h3>
+        <p>Are you sure? This action is <strong>permanent</strong>. All your posts, friends data, and personal info will be erased forever.</p>
+        <button id="confirmDeleteBtn">Yes, delete my account</button>
+        <button id="cancelDeleteBtn">Cancel</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, update, remove, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    let currentUser = null;
+    const ADMIN_UID = "6JkPCRetiCOX65opu4ofqAiTXaY2";
+    
+    // ========== SKELETON LOADING FUNCTIONS ==========
+    
+    function showProfileSkeleton() {
+        document.getElementById('coverSkeleton').style.display = 'block';
+        document.getElementById('coverArea').style.display = 'none';
+        document.getElementById('avatarSkeleton').style.display = 'block';
+        document.getElementById('profilePicWrapper').style.display = 'none';
+        document.getElementById('profileInfoSkeleton').style.display = 'block';
+        document.getElementById('profileInfo').style.display = 'none';
+        document.getElementById('statsSkeleton').style.display = 'flex';
+        document.getElementById('statsRow').style.display = 'none';
+        document.getElementById('postsSkeleton').style.display = 'flex';
+        document.getElementById('postsContainer').style.display = 'none';
+        document.getElementById('friendsSkeleton').style.display = 'none';
+        document.getElementById('friendsContainer').style.display = 'none';
+        document.getElementById('aboutSkeleton').style.display = 'none';
+        document.getElementById('aboutContainer').style.display = 'none';
+    }
+    
+    function hideProfileSkeleton() {
+        document.getElementById('coverSkeleton').style.display = 'none';
+        document.getElementById('coverArea').style.display = 'block';
+        document.getElementById('avatarSkeleton').style.display = 'none';
+        document.getElementById('profilePicWrapper').style.display = 'block';
+        document.getElementById('profileInfoSkeleton').style.display = 'none';
+        document.getElementById('profileInfo').style.display = 'block';
+        document.getElementById('statsSkeleton').style.display = 'none';
+        document.getElementById('statsRow').style.display = 'flex';
+    }
+    
+    function showPostsSkeleton() {
+        document.getElementById('postsSkeleton').style.display = 'flex';
+        document.getElementById('postsContainer').style.display = 'none';
+    }
+    
+    function hidePostsSkeleton() {
+        document.getElementById('postsSkeleton').style.display = 'none';
+        document.getElementById('postsContainer').style.display = 'flex';
+        document.getElementById('postsContainer').classList.add('content-loaded');
+    }
+    
+    function showFriendsSkeleton() {
+        document.getElementById('friendsSkeleton').style.display = 'grid';
+        document.getElementById('friendsContainer').style.display = 'none';
+    }
+    
+    function hideFriendsSkeleton() {
+        document.getElementById('friendsSkeleton').style.display = 'none';
+        document.getElementById('friendsContainer').style.display = 'grid';
+        document.getElementById('friendsContainer').classList.add('content-loaded');
+    }
+    
+    function showAboutSkeleton() {
+        document.getElementById('aboutSkeleton').style.display = 'flex';
+        document.getElementById('aboutContainer').style.display = 'none';
+    }
+    
+    function hideAboutSkeleton() {
+        document.getElementById('aboutSkeleton').style.display = 'none';
+        document.getElementById('aboutContainer').style.display = 'flex';
+        document.getElementById('aboutContainer').classList.add('content-loaded');
+    }
+    
+    // ========== END SKELETON FUNCTIONS ==========
+    
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        t.style.background = isError ? '#b91c1c' : '#1e293b';
+        setTimeout(() => {
+            t.style.opacity = '0';
+            t.style.background = '#1e293b';
+        }, 3000);
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    function addAdminPanelIfAllowed(uid) {
+        const dropdown = document.getElementById('dropdownMenu');
+        const deleteItem = document.getElementById('deleteAccountItem');
+        if (uid === ADMIN_UID) {
+            if (!document.getElementById('adminPanelItem')) {
+                const adminItem = document.createElement('div');
+                adminItem.id = 'adminPanelItem';
+                adminItem.className = 'dropdown-item';
+                adminItem.innerHTML = '<i class="fas fa-tachometer-alt"></i> Admin Panel';
+                adminItem.addEventListener('click', () => {
+                    window.location.href = 'admin-users.html';
+                });
+                dropdown.insertBefore(adminItem, deleteItem);
+            }
+        } else {
+            const existingAdmin = document.getElementById('adminPanelItem');
+            if (existingAdmin) existingAdmin.remove();
+        }
+    }
+    
+    function initMenu() {
+        const hamburger = document.getElementById('hamburgerBtn');
+        const dropdown = document.getElementById('dropdownMenu');
+        const overlay = document.getElementById('menuOverlay');
+        
+        function closeMenu() {
+            dropdown.classList.remove('show');
+            overlay.style.display = 'none';
+        }
+        function openMenu() {
+            dropdown.classList.add('show');
+            overlay.style.display = 'block';
+        }
+        hamburger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (dropdown.classList.contains('show')) closeMenu();
+            else openMenu();
+        });
+        overlay.addEventListener('click', closeMenu);
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target) && !hamburger.contains(e.target) && dropdown.classList.contains('show')) {
+                closeMenu();
+            }
+        });
+        
+        document.getElementById('logoutItem').addEventListener('click', async () => {
+            closeMenu();
+            try {
+                await signOut(auth);
+                showToast('Logged out successfully');
+                window.location.href = 'login.html';
+            } catch (err) {
+                showToast('Logout failed: ' + err.message, true);
+            }
+        });
+        
+        document.getElementById('deleteAccountItem').addEventListener('click', () => {
+            closeMenu();
+            document.getElementById('deleteConfirmModal').style.display = 'flex';
+        });
+    }
+    
+    async function deleteUserAccountCompletely(userAuth, userData) {
+        const uid = userAuth.uid;
+        const postsRef = ref(db, 'posts');
+        const postsSnap = await get(postsRef);
+        const posts = postsSnap.val() || {};
+        const deletePostPromises = [];
+        for (const [postId, post] of Object.entries(posts)) {
+            if (post.userId === uid) {
+                deletePostPromises.push(remove(ref(db, `posts/${postId}`)));
+            } else if (post.comments && typeof post.comments === 'object') {
+                let commentsChanged = false;
+                const newComments = { ...post.comments };
+                for (const [commentId, comment] of Object.entries(post.comments)) {
+                    if (comment.userId === uid) {
+                        delete newComments[commentId];
+                        commentsChanged = true;
+                    }
+                }
+                if (commentsChanged) {
+                    deletePostPromises.push(update(ref(db, `posts/${postId}`), { comments: newComments }));
+                }
+            }
+        }
+        await Promise.all(deletePostPromises);
+        
+        const usersRef = ref(db, 'users');
+        const usersSnap = await get(usersRef);
+        const allUsers = usersSnap.val() || {};
+        const friendUpdatePromises = [];
+        for (const [otherUid, otherUser] of Object.entries(allUsers)) {
+            if (otherUid !== uid && otherUser.friends && Array.isArray(otherUser.friends) && otherUser.friends.includes(uid)) {
+                const newFriends = otherUser.friends.filter(fid => fid !== uid);
+                friendUpdatePromises.push(update(ref(db, `users/${otherUid}`), { friends: newFriends }));
+            }
+        }
+        await Promise.all(friendUpdatePromises);
+        await remove(ref(db, `users/${uid}`));
+        
+        try {
+            await deleteUser(userAuth);
+            showToast('Account permanently deleted');
+        } catch (authErr) {
+            if (authErr.code === 'auth/requires-recent-login') {
+                showToast('Please log out and log in again before deleting account.', true);
+                throw new Error('requires-recent-login');
+            } else {
+                throw authErr;
+            }
+        }
+    }
+    
+    async function loadUserData(user) {
+        // Show skeleton while loading
+        showProfileSkeleton();
+        
+        const userRef = ref(db, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            currentUser = { uid: user.uid, ...snapshot.val() };
+        } else {
+            const emailPrefix = user.email.split('@')[0];
+            currentUser = { 
+                uid: user.uid, 
+                fullName: emailPrefix,
+                username: emailPrefix,
+                displayName: emailPrefix,
+                profilePic: `https://ui-avatars.com/api/?background=667eea&color=fff&name=${emailPrefix[0] || 'U'}`, 
+                bio: '', location: '', work: '', education: '', relationship: '', friends: [] 
+            };
+            await set(ref(db, `users/${user.uid}`), currentUser);
+        }
+        if (!currentUser.fullName && currentUser.displayName) {
+            currentUser.fullName = currentUser.displayName;
+            await update(ref(db, `users/${user.uid}`), { fullName: currentUser.displayName });
+        }
+        if (!currentUser.fullName) {
+            currentUser.fullName = currentUser.username || user.email.split('@')[0];
+            await update(ref(db, `users/${user.uid}`), { fullName: currentUser.fullName });
+        }
+        if (!currentUser.username || currentUser.username === 'user') {
+            currentUser.username = currentUser.fullName;
+            await update(ref(db, `users/${user.uid}`), { username: currentUser.username });
+        }
+        
+        // Hide skeleton and show real content
+        hideProfileSkeleton();
+        
+        renderProfile();
+        renderUserPosts();
+        renderAbout();
+        renderFriends();
+        updateStats();
+        updateUI();
+        addAdminPanelIfAllowed(user.uid);
+    }
+    
+    function renderProfile() {
+        const fullName = currentUser.fullName || currentUser.displayName || 'User';
+        document.getElementById('displayName').innerText = fullName;
+        document.getElementById('username').innerText = '@' + (currentUser.username || fullName);
+        document.getElementById('displayBio').innerText = currentUser.bio || 'No bio yet';
+        document.getElementById('profileImage').src = currentUser.profilePic || `https://ui-avatars.com/api/?background=667eea&color=fff&name=${fullName[0] || 'U'}`;
+        
+        const locationRow = document.getElementById('locationRow');
+        const locationVal = document.getElementById('locationValue');
+        if (currentUser.location) {
+            locationVal.innerText = currentUser.location;
+            locationRow.style.display = 'flex';
+        } else locationRow.style.display = 'none';
+        
+        const relationshipRow = document.getElementById('relationshipRow');
+        const relationshipVal = document.getElementById('relationshipValue');
+        if (currentUser.relationship) {
+            const map = { single: 'Single', married: 'Married', 'in a relationship': 'In a relationship', engaged: 'Engaged', 'its complicated': 'It\'s complicated' };
+            relationshipVal.innerText = map[currentUser.relationship] || currentUser.relationship;
+            relationshipRow.style.display = 'flex';
+        } else relationshipRow.style.display = 'none';
+        
+        const workRow = document.getElementById('workRow');
+        const workVal = document.getElementById('workValue');
+        if (currentUser.work) {
+            workVal.innerText = currentUser.work;
+            workRow.style.display = 'flex';
+        } else workRow.style.display = 'none';
+        
+        const eduRow = document.getElementById('educationRow');
+        const eduVal = document.getElementById('educationValue');
+        if (currentUser.education) {
+            eduVal.innerText = currentUser.education;
+            eduRow.style.display = 'flex';
+        } else eduRow.style.display = 'none';
+        
+        const coverImg = document.getElementById('coverImage');
+        if (currentUser.coverPic) {
+            coverImg.src = currentUser.coverPic;
+            coverImg.style.display = 'block';
+        } else {
+            coverImg.style.display = 'none';
+            coverImg.src = '';
+        }
+    }
+    
+    async function renderUserPosts() {
+        showPostsSkeleton();
+        
+        const container = document.getElementById('postsContainer');
+        const postsRef = ref(db, 'posts');
+        const snapshot = await get(postsRef);
+        const allPosts = snapshot.val() || {};
+        const userPosts = [];
+        for (const [id, post] of Object.entries(allPosts)) {
+            if (post.userId === currentUser.uid) {
+                userPosts.push({ id, ...post });
+            }
+        }
+        userPosts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        hidePostsSkeleton();
+        
+        if (userPosts.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:40px;">No posts yet</div>';
+            document.getElementById('postCount').innerText = '0';
+            return;
+        }
+        container.innerHTML = userPosts.map(post => `
+            <div class="post-card" data-post-id="${post.id}">
+                <div class="post-header">
+                    <img class="post-avatar" src="${post.userProfilePic || currentUser.profilePic}" style="width:40px;height:40px;border-radius:50%;">
+                    <div><div class="post-name">${escapeHtml(post.userName)}</div><div class="post-time">${new Date(post.timestamp).toLocaleDateString()}</div></div>
+                </div>
+                <div class="post-content">${escapeHtml(post.content)}</div>
+                ${post.media ? (post.mediaType === 'image' ? `<img src="${post.media}" class="post-media">` : `<video src="${post.media}" class="post-media" controls></video>`) : ''}
+                <div class="post-stats"><span>❤️ ${post.likes?.length || 0}</span><span>💬 ${post.comments ? Object.keys(post.comments).length : 0}</span></div>
+                <button class="delete-post-btn" data-id="${post.id}">Delete</button>
+            </div>
+        `).join('');
+        document.querySelectorAll('.delete-post-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (confirm('Delete this post?')) {
+                    await remove(ref(db, `posts/${btn.dataset.id}`));
+                    renderUserPosts();
+                    updateStats();
+                    showToast('Post deleted');
+                }
+            });
+        });
+        updateStats();
+    }
+    
+    function renderAbout() {
+        showAboutSkeleton();
+        
+        const container = document.getElementById('aboutContainer');
+        container.innerHTML = `
+            <div class="about-item"><div class="about-label">Bio</div><div class="about-value">${escapeHtml(currentUser.bio || 'Not provided')}</div></div>
+            <div class="about-item"><div class="about-label">Work</div><div class="about-value">${escapeHtml(currentUser.work || 'Not provided')}</div></div>
+            <div class="about-item"><div class="about-label">Education</div><div class="about-value">${escapeHtml(currentUser.education || 'Not provided')}</div></div>
+            <div class="about-item"><div class="about-label">Location</div><div class="about-value">${escapeHtml(currentUser.location || 'Not provided')}</div></div>
+            <div class="about-item"><div class="about-label">Relationship</div><div class="about-value">${escapeHtml(currentUser.relationship || 'Not specified')}</div></div>
+        `;
+        
+        hideAboutSkeleton();
+    }
+    
+    async function renderFriends() {
+        showFriendsSkeleton();
+        
+        const container = document.getElementById('friendsContainer');
+        const friendIds = currentUser.friends || [];
+        if (friendIds.length === 0) {
+            hideFriendsSkeleton();
+            container.innerHTML = '<div style="text-align:center; padding:40px;">No friends yet</div>';
+            return;
+        }
+        const friends = [];
+        for (const id of friendIds) {
+            const friendSnap = await get(ref(db, `users/${id}`));
+            if (friendSnap.exists()) friends.push(friendSnap.val());
+        }
+        
+        hideFriendsSkeleton();
+        
+        container.innerHTML = friends.map(f => `
+            <div class="friend-card">
+                <img class="friend-avatar" src="${f.profilePic || 'https://ui-avatars.com/api/?background=667eea&color=fff'}">
+                <div class="friend-name">${escapeHtml(f.fullName || f.displayName || f.username)}</div>
+            </div>
+        `).join('');
+    }
+    
+    async function updateStats() {
+        const postsRef = ref(db, 'posts');
+        const snapshot = await get(postsRef);
+        let count = 0;
+        const all = snapshot.val() || {};
+        for (const p of Object.values(all)) {
+            if (p.userId === currentUser.uid) count++;
+        }
+        document.getElementById('postCount').innerText = count;
+        document.getElementById('friendCount').innerText = currentUser.friends?.length || 0;
+    }
+    
+    function updateUI() {
+        // No bottom nav to update anymore
+    }
+    
+    async function updateProfile(updates) {
+        await update(ref(db, `users/${currentUser.uid}`), updates);
+        Object.assign(currentUser, updates);
+        renderProfile();
+        renderAbout();
+        showToast('Profile updated');
+    }
+    
+    function handleImageUpload(file, isProfile) {
+        if (!file || !file.type.startsWith('image/')) return showToast('Select an image');
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const field = isProfile ? 'profilePic' : 'coverPic';
+            await update(ref(db, `users/${currentUser.uid}`), { [field]: e.target.result });
+            currentUser[field] = e.target.result;
+            renderProfile();
+            showToast(isProfile ? 'Profile picture updated' : 'Cover photo updated');
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function setupEvents() {
+        document.getElementById('editProfileBtn').onclick = () => {
+            document.getElementById('editFullName').value = currentUser.fullName || currentUser.displayName || '';
+            document.getElementById('editUsername').value = currentUser.username || '';
+            document.getElementById('editBio').value = currentUser.bio || '';
+            document.getElementById('editLocation').value = currentUser.location || '';
+            document.getElementById('editWork').value = currentUser.work || '';
+            document.getElementById('editEducation').value = currentUser.education || '';
+            document.getElementById('editRelationship').value = currentUser.relationship || '';
+            document.getElementById('editModal').style.display = 'flex';
+        };
+        document.getElementById('closeEditModal').onclick = () => document.getElementById('editModal').style.display = 'none';
+        document.getElementById('saveProfileChanges').onclick = async () => {
+            const newFullName = document.getElementById('editFullName').value.trim();
+            const newUsername = document.getElementById('editUsername').value.trim();
+            const updates = {
+                bio: document.getElementById('editBio').value,
+                location: document.getElementById('editLocation').value,
+                work: document.getElementById('editWork').value,
+                education: document.getElementById('editEducation').value,
+                relationship: document.getElementById('editRelationship').value
+            };
+            if (newFullName) {
+                updates.fullName = newFullName;
+                updates.displayName = newFullName;
+            }
+            if (newUsername) updates.username = newUsername;
+            await updateProfile(updates);
+            document.getElementById('editModal').style.display = 'none';
+        };
+        
+        document.getElementById('profilePicWrapper').onclick = () => document.getElementById('profileImageUpload').click();
+        document.getElementById('profileImageUpload').onchange = (e) => handleImageUpload(e.target.files[0], true);
+        document.getElementById('editCoverBtn').onclick = () => document.getElementById('coverImageUpload').click();
+        document.getElementById('coverImageUpload').onchange = (e) => handleImageUpload(e.target.files[0], false);
+        
+        const tabs = document.querySelectorAll('.tab-btn');
+        const containers = {
+            posts: document.getElementById('postsContainer'),
+            about: document.getElementById('aboutContainer'),
+            friends: document.getElementById('friendsContainer')
+        };
+        const skeletons = {
+            posts: document.getElementById('postsSkeleton'),
+            about: document.getElementById('aboutSkeleton'),
+            friends: document.getElementById('friendsSkeleton')
+        };
+        
+        tabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tab = btn.dataset.tab;
+                tabs.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Hide all containers and skeletons first
+                Object.keys(containers).forEach(key => {
+                    containers[key].style.display = 'none';
+                    skeletons[key].style.display = 'none';
+                });
+                
+                // Show skeleton for selected tab, then load content
+                skeletons[tab].style.display = tab === 'friends' ? 'grid' : 'flex';
+                
+                // Load content after a tiny delay to show skeleton
+                setTimeout(() => {
+                    if (tab === 'friends') renderFriends();
+                    else if (tab === 'about') renderAbout();
+                    // Posts is already loaded initially
+                    if (tab === 'posts') {
+                        skeletons.posts.style.display = 'none';
+                        containers.posts.style.display = 'flex';
+                    }
+                }, 100);
+            });
+        });
+        
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const tab = card.dataset.tab;
+                document.querySelector(`.tab-btn[data-tab="${tab}"]`).click();
+            });
+        });
+        
+        document.getElementById('shareProfileBtn').onclick = () => {
+            navigator.clipboard.writeText(window.location.href);
+            showToast('Profile link copied');
+        };
+        
+        const deleteModal = document.getElementById('deleteConfirmModal');
+        document.getElementById('confirmDeleteBtn').onclick = async () => {
+            deleteModal.style.display = 'none';
+            const user = auth.currentUser;
+            if (!user) return;
+            showToast('Deleting account... please wait');
+            try {
+                await deleteUserAccountCompletely(user, currentUser);
+                await signOut(auth);
+                window.location.href = 'login.html';
+            } catch (err) {
+                if (err.message === 'requires-recent-login') {
+                    showToast('Please log out and log back in to delete account', true);
+                } else {
+                    showToast('Delete failed: ' + err.message, true);
+                }
+            }
+        };
+        document.getElementById('cancelDeleteBtn').onclick = () => deleteModal.style.display = 'none';
+    }
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            await loadUserData(user);
+            setupEvents();
+            initMenu();
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+</script>
+</body>
+</html>

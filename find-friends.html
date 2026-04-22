@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SocialNest • Find Friends</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        
+        body {
+            background-image: url("naruto1.jpg");
+            background-size: cover;
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px 30px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-icon span {
+            font-family: 'Fira Code', monospace;
+            font-weight: 900;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .back-btn {
+            background: #e9eef3;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #1e293b;
+            transition: 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* Search Section */
+        .search-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1e293b;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+        }
+        
+        .search-input:focus {
+            border-color: #667eea;
+        }
+        
+        .search-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .search-btn:hover {
+            transform: scale(1.02);
+            background: #059669;
+        }
+        
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #64748b;
+            margin-top: 8px;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            color: #1e293b;
+        }
+        
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* Users Grid */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .user-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            transition: 0.2s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .user-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 12px;
+            display: block;
+            border: 3px solid #667eea;
+        }
+        
+        .user-name {
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            color: #1e293b;
+        }
+        
+        .user-username {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        
+        .user-bio {
+            text-align: center;
+            font-size: 12px;
+            color: #8a99b4;
+            margin-top: 8px;
+            padding: 0 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .user-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 12px 0;
+            padding: 8px 0;
+            border-top: 1px solid #eef2f6;
+            border-bottom: 1px solid #eef2f6;
+        }
+        
+        .user-stat {
+            text-align: center;
+        }
+        
+        .user-stat-value {
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .user-stat-label {
+            font-size: 10px;
+            color: #64748b;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 13px;
+        }
+        
+        .add-friend-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        .add-friend-btn:hover {
+            background: #059669;
+        }
+        
+        .pending-btn {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .pending-btn:hover {
+            background: #d97706;
+        }
+        
+        .cancel-request-btn {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .cancel-request-btn:hover {
+            background: #dc2626;
+        }
+        
+        .friends-btn {
+            background: #94a3b8;
+            color: white;
+            cursor: default;
+        }
+        
+        .view-profile-btn {
+            background: #e9eef3;
+            color: #1e293b;
+        }
+        
+        .view-profile-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            color: #64748b;
+            grid-column: 1/-1;
+        }
+        
+        /* ========== FACEBOOK-STYLE SKELETON LOADING ========== */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f2f5 25%, #e4e6eb 50%, #f0f2f5 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .skeleton-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 0;
+        }
+        
+        .skeleton-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+        }
+        
+        .skeleton-text {
+            height: 14px;
+            margin: 8px 0;
+            border-radius: 7px;
+        }
+        
+        .skeleton-title {
+            width: 60%;
+            height: 18px;
+            margin: 0 auto 8px;
+        }
+        
+        .skeleton-subtitle {
+            width: 40%;
+            height: 12px;
+            margin: 0 auto;
+        }
+        
+        .skeleton-line {
+            height: 10px;
+            margin: 6px 0;
+            border-radius: 5px;
+        }
+        
+        .skeleton-button {
+            height: 36px;
+            border-radius: 40px;
+            margin-top: 12px;
+        }
+        
+        .skeleton-stats {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 12px 0;
+            padding: 8px 0;
+        }
+        
+        .skeleton-stat {
+            width: 50px;
+            height: 30px;
+            border-radius: 8px;
+        }
+        
+        .content-loaded {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            z-index: 1000;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .toast.error {
+            background: #dc2626;
+        }
+        
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            .header { padding: 16px 20px; }
+            .logo-text { font-size: 18px; }
+            .users-grid { grid-template-columns: 1fr; }
+            .search-box { flex-direction: column; }
+            .search-btn { width: 100%; }
+            .toast { white-space: normal; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon"><span>SN</span></div>
+            <span class="logo-text">SocialNest</span>
+        </div>
+        <button class="back-btn" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+    </div>
+    
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="search-title">
+            <i class="fas fa-search"></i> Find Friends
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" class="search-input" placeholder="Search by username or name...">
+            <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> Search</button>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-number" id="totalUsers">0</div>
+            <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="friendsCount">0</div>
+            <div class="stat-label">My Friends</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="sentRequests">0</div>
+            <div class="stat-label">Sent Requests</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="receivedRequests">0</div>
+            <div class="stat-label">Received Requests</div>
+        </div>
+    </div>
+    
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-filter="all">All Users</button>
+        <button class="tab-btn" data-filter="suggested">Suggested</button>
+        <button class="tab-btn" data-filter="sent">Sent Requests</button>
+        <button class="tab-btn" data-filter="received">Received</button>
+        <button class="tab-btn" data-filter="friends">My Friends</button>
+    </div>
+    
+    <!-- Users Grid (skeleton will be shown here) -->
+    <div id="usersGrid" class="users-grid"></div>
+</div>
+
+<div id="toastMsg" class="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
+        authDomain: "obinna-web.firebaseapp.com",
+        databaseURL: "https://obinna-web-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "obinna-web",
+        storageBucket: "obinna-web.firebasestorage.app",
+        messagingSenderId: "1066859676740",
+        appId: "1:1066859676740:web:0479ddb0a1bc9020fe6811"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    
+    let currentUser = null;
+    let allUsers = [];
+    let currentFilter = 'all';
+    let searchQuery = '';
+    
+    // Cooldown tracking for friend requests
+    const pendingRequestsCache = new Map();
+    const REQUEST_COOLDOWN = 60000; // 60 seconds
+    
+    function showToast(msg, isError = false) {
+        const t = document.getElementById('toastMsg');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        t.style.background = isError ? '#dc2626' : '#1e293b';
+        setTimeout(() => t.style.opacity = '0', 3000);
+    }
+    
+    function escapeHTML(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // ========== SKELETON LOADING FUNCTIONS ==========
+    function showSkeletonUsers() {
+        const container = document.getElementById('usersGrid');
+        let skeletons = '';
+        for (let i = 0; i < 6; i++) {
+            skeletons += `
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-avatar"></div>
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-subtitle"></div>
+                    <div class="skeleton skeleton-line" style="width: 80%; margin: 8px auto;"></div>
+                    <div class="skeleton-stats">
+                        <div class="skeleton skeleton-stat"></div>
+                        <div class="skeleton skeleton-stat"></div>
+                    </div>
+                    <div class="skeleton skeleton-button"></div>
+                    <div class="skeleton skeleton-button" style="margin-top: 8px;"></div>
+                </div>
+            `;
+        }
+        container.innerHTML = skeletons;
+    }
+    
+    // ========== FRIEND REQUEST FUNCTIONS (with duplicate prevention) ==========
+    
+    // Send friend request with cooldown and duplicate check
+    async function sendFriendRequest(targetUserId, targetUsername) {
+        if (!targetUserId || targetUserId === currentUser.uid) {
+            showToast("You cannot send a friend request to yourself", true);
+            return false;
+        }
+        
+        // Check cooldown
+        const lastRequestTime = pendingRequestsCache.get(targetUserId) || 0;
+        const now = Date.now();
+        if (now - lastRequestTime < REQUEST_COOLDOWN) {
+            const secondsLeft = Math.ceil((REQUEST_COOLDOWN - (now - lastRequestTime)) / 1000);
+            showToast(`Please wait ${secondsLeft} seconds before sending another request`, true);
+            return false;
+        }
+        
+        try {
+            const targetRef = ref(db, `users/${targetUserId}`);
+            const targetSnap = await get(targetRef);
+            const targetUser = targetSnap.val();
+            
+            if (!targetUser) {
+                showToast("User not found", true);
+                return false;
+            }
+            
+            // Check if already friends
+            const currentUserRef = ref(db, `users/${currentUser.uid}`);
+            const currentSnap = await get(currentUserRef);
+            const currentUserData = currentSnap.val();
+            
+            if (currentUserData.friends && currentUserData.friends.includes(targetUserId)) {
+                showToast(`You are already friends with ${targetUsername}`, true);
+                return false;
+            }
+            
+            // Check if request already exists (prevent duplicate)
+            const existingRequests = targetUser.friendRequests || [];
+            if (existingRequests.includes(currentUser.uid)) {
+                showToast(`Friend request already sent to ${targetUsername}`, true);
+                return false;
+            }
+            
+            // Send request - use Set to prevent duplicates
+            const newRequests = [...new Set([...existingRequests, currentUser.uid])];
+            await update(targetRef, { friendRequests: newRequests });
+            
+            // Update cooldown
+            pendingRequestsCache.set(targetUserId, now);
+            
+            showToast(`Friend request sent to ${targetUsername}`);
+            await loadAllUsers(); // Refresh UI
+            return true;
+            
+        } catch (error) {
+            console.error("Error sending request:", error);
+            showToast("Error sending friend request", true);
+            return false;
+        }
+    }
+    
+    // Cancel sent friend request
+    async function cancelSentRequest(targetUserId, targetUsername) {
+        try {
+            const targetRef = ref(db, `users/${targetUserId}`);
+            const targetSnap = await get(targetRef);
+            const targetUser = targetSnap.val();
+            
+            if (!targetUser) {
+                showToast("User not found", true);
+                return false;
+            }
+            
+            const currentRequests = targetUser.friendRequests || [];
+            const updatedRequests = currentRequests.filter(id => id !== currentUser.uid);
+            
+            await update(targetRef, { friendRequests: updatedRequests });
+            showToast(`Cancelled friend request to ${targetUsername}`);
+            await loadAllUsers();
+            return true;
+        } catch (error) {
+            console.error("Error cancelling request:", error);
+            showToast("Error cancelling request", true);
+            return false;
+        }
+    }
+    
+    // Accept friend request (with duplicate prevention)
+    async function acceptFriendRequest(fromUserId, fromUsername) {
+        try {
+            // Get current user data
+            const userRef = ref(db, `users/${currentUser.uid}`);
+            const userSnap = await get(userRef);
+            const userData = userSnap.val();
+            
+            // Get sender data
+            const senderRef = ref(db, `users/${fromUserId}`);
+            const senderSnap = await get(senderRef);
+            const senderData = senderSnap.val();
+            
+            if (!userData || !senderData) {
+                showToast("Error: User data not found", true);
+                return false;
+            }
+            
+            // Use Set to prevent duplicates
+            let currentFriends = userData.friends || [];
+            let senderFriends = senderData.friends || [];
+            let currentRequests = userData.friendRequests || [];
+            
+            // Remove duplicates
+            currentFriends = [...new Set(currentFriends)];
+            senderFriends = [...new Set(senderFriends)];
+            currentRequests = [...new Set(currentRequests)];
+            
+            // Check if already friends (prevent double addition)
+            if (currentFriends.includes(fromUserId)) {
+                showToast("Already friends with this user", true);
+                // Still remove from requests
+                const newRequests = currentRequests.filter(id => id !== fromUserId);
+                await update(userRef, { friendRequests: newRequests });
+                await loadAllUsers();
+                return true;
+            }
+            
+            // Add friend only if not already present
+            if (!currentFriends.includes(fromUserId)) {
+                currentFriends.push(fromUserId);
+            }
+            if (!senderFriends.includes(currentUser.uid)) {
+                senderFriends.push(currentUser.uid);
+            }
+            
+            // Remove from friend requests
+            const newRequests = currentRequests.filter(id => id !== fromUserId);
+            
+            // Update both users
+            await update(userRef, {
+                friends: currentFriends,
+                friendRequests: newRequests
+            });
+            
+            await update(senderRef, {
+                friends: senderFriends
+            });
+            
+            showToast(`You are now friends with ${fromUsername}!`);
+            await loadAllUsers();
+            return true;
+            
+        } catch (error) {
+            console.error("Error accepting request:", error);
+            showToast("Error accepting request", true);
+            return false;
+        }
+    }
+    
+    // Reject friend request
+    async function rejectFriendRequest(fromUserId, fromUsername) {
+        try {
+            const userRef = ref(db, `users/${currentUser.uid}`);
+            const userSnap = await get(userRef);
+            const userData = userSnap.val();
+            
+            const currentRequests = userData.friendRequests || [];
+            const updatedRequests = currentRequests.filter(id => id !== fromUserId);
+            
+            await update(userRef, { friendRequests: updatedRequests });
+            showToast(`Rejected friend request from ${fromUsername}`);
+            await loadAllUsers();
+            return true;
+        } catch (error) {
+            console.error("Error rejecting request:", error);
+            showToast("Error rejecting request", true);
+            return false;
+        }
+    }
+    
+    // Load all users
+    async function loadAllUsers() {
+        // Show skeleton first
+        showSkeletonUsers();
+        
+        const usersRef = ref(db, 'users');
+        const snapshot = await get(usersRef);
+        const users = snapshot.val() || {};
+        
+        allUsers = [];
+        let sentCount = 0;
+        let receivedCount = 0;
+        
+        // Get current user's friends and requests (use Set for deduplication)
+        const currentFriends = new Set(currentUser.friends || []);
+        const currentFriendRequests = new Set(currentUser.friendRequests || []);
+        
+        for (const [id, user] of Object.entries(users)) {
+            if (id !== currentUser.uid) {
+                const friendRequests = user.friendRequests || [];
+                const hasRequestFromMe = friendRequests.includes(currentUser.uid);
+                const hasRequestToMe = currentFriendRequests.has(id);
+                const isFriend = currentFriends.has(id);
+                
+                if (hasRequestFromMe) sentCount++;
+                if (hasRequestToMe) receivedCount++;
+                
+                allUsers.push({
+                    uid: id,
+                    ...user,
+                    hasRequestFromMe: hasRequestFromMe,
+                    hasRequestToMe: hasRequestToMe,
+                    isFriend: isFriend
+                });
+            }
+        }
+        
+        // Update stats
+        document.getElementById('totalUsers').textContent = allUsers.length;
+        document.getElementById('friendsCount').textContent = currentFriends.size;
+        document.getElementById('sentRequests').textContent = sentCount;
+        document.getElementById('receivedRequests').textContent = receivedCount;
+        
+        renderUsers();
+    }
+    
+    // Render users based on filter and search
+    function renderUsers() {
+        const container = document.getElementById('usersGrid');
+        
+        let filteredUsers = [...allUsers];
+        
+        // Apply search filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            filteredUsers = filteredUsers.filter(user => 
+                user.displayName?.toLowerCase().includes(query) ||
+                user.username?.toLowerCase().includes(query)
+            );
+        }
+        
+        // Apply category filter
+        switch(currentFilter) {
+            case 'suggested':
+                filteredUsers = filteredUsers.filter(user => 
+                    !user.isFriend && !user.hasRequestFromMe && !user.hasRequestToMe
+                );
+                break;
+            case 'sent':
+                filteredUsers = filteredUsers.filter(user => user.hasRequestFromMe);
+                break;
+            case 'received':
+                filteredUsers = filteredUsers.filter(user => user.hasRequestToMe);
+                break;
+            case 'friends':
+                filteredUsers = filteredUsers.filter(user => user.isFriend);
+                break;
+            default:
+                // 'all' - show everyone except friends
+                filteredUsers = filteredUsers.filter(user => !user.isFriend);
+        }
+        
+        if (filteredUsers.length === 0) {
+            container.innerHTML = `<div class="empty-state">
+                <i class="fas fa-user-friends" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                <h3>No users found</h3>
+                <p>Try searching for someone or check back later</p>
+            </div>`;
+            return;
+        }
+        
+        container.innerHTML = filteredUsers.map(user => {
+            let buttonHtml = '';
+            
+            if (user.isFriend) {
+                buttonHtml = `<button class="action-btn friends-btn" disabled><i class="fas fa-check"></i> Friends</button>`;
+            } else if (user.hasRequestToMe) {
+                buttonHtml = `
+                    <button class="action-btn add-friend-btn accept-req" data-uid="${user.uid}" data-name="${escapeHTML(user.displayName)}"><i class="fas fa-check"></i> Accept</button>
+                    <button class="action-btn cancel-request-btn reject-req" data-uid="${user.uid}" data-name="${escapeHTML(user.displayName)}"><i class="fas fa-times"></i> Reject</button>
+                `;
+            } else if (user.hasRequestFromMe) {
+                buttonHtml = `
+                    <button class="action-btn pending-btn" disabled><i class="fas fa-clock"></i> Request Sent</button>
+                    <button class="action-btn cancel-request-btn cancel-sent" data-uid="${user.uid}" data-name="${escapeHTML(user.displayName)}"><i class="fas fa-ban"></i> Cancel</button>
+                `;
+            } else {
+                buttonHtml = `<button class="action-btn add-friend-btn send-req" data-uid="${user.uid}" data-name="${escapeHTML(user.displayName)}"><i class="fas fa-user-plus"></i> Add Friend</button>`;
+            }
+            
+            return `
+                <div class="user-card" data-user-id="${user.uid}">
+                    <img class="user-avatar" src="${user.profilePic || 'https://ui-avatars.com/api/?background=667eea&color=fff'}" alt="${escapeHTML(user.displayName)}">
+                    <div class="user-name">${escapeHTML(user.displayName)}</div>
+                    <div class="user-username">@${escapeHTML(user.username)}</div>
+                    <div class="user-bio">${escapeHTML(user.bio) || 'No bio yet'}</div>
+                    <div class="user-stats">
+                        <div class="user-stat">
+                            <div class="user-stat-value">${user.posts?.length || 0}</div>
+                            <div class="user-stat-label">Posts</div>
+                        </div>
+                        <div class="user-stat">
+                            <div class="user-stat-value">${user.friends?.length || 0}</div>
+                            <div class="user-stat-label">Friends</div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        ${buttonHtml}
+                        <button class="action-btn view-profile-btn" data-uid="${user.uid}"><i class="fas fa-eye"></i> Profile</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+        // Add event listeners
+        document.querySelectorAll('.send-req').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const uid = btn.dataset.uid;
+                const name = btn.dataset.name;
+                await sendFriendRequest(uid, name);
+            });
+        });
+        
+        document.querySelectorAll('.cancel-sent').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const uid = btn.dataset.uid;
+                const name = btn.dataset.name;
+                await cancelSentRequest(uid, name);
+            });
+        });
+        
+        document.querySelectorAll('.accept-req').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const uid = btn.dataset.uid;
+                const name = btn.dataset.name;
+                await acceptFriendRequest(uid, name);
+            });
+        });
+        
+        document.querySelectorAll('.reject-req').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const uid = btn.dataset.uid;
+                const name = btn.dataset.name;
+                await rejectFriendRequest(uid, name);
+            });
+        });
+        
+        document.querySelectorAll('.view-profile-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const uid = btn.dataset.uid;
+                window.location.href = `view-profile.html?uid=${uid}`;
+            });
+        });
+    }
+    
+    // Setup event listeners
+    function setupEventListeners() {
+        // Search
+        const searchBtn = document.getElementById('searchBtn');
+        const searchInput = document.getElementById('searchInput');
+        
+        searchBtn.addEventListener('click', () => {
+            searchQuery = searchInput.value.trim();
+            renderUsers();
+        });
+        
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchQuery = searchInput.value.trim();
+                renderUsers();
+            }
+        });
+        
+        // Filter tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderUsers();
+            });
+        });
+    }
+    
+    // Load current user data
+    async function loadCurrentUser(user) {
+        const userRef = ref(db, `users/${user.uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+            currentUser = { uid: user.uid, ...snapshot.val() };
+        } else {
+            const defaultName = user.email.split('@')[0];
+            currentUser = { 
+                uid: user.uid, 
+                displayName: defaultName, 
+                username: defaultName, 
+                friends: [], 
+                friendRequests: [] 
+            };
+            await update(userRef, currentUser);
+        }
+    }
+    
+    // Auth state listener
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            await loadCurrentUser(user);
+            await loadAllUsers();
+            setupEventListeners();
+        } else {
+            window.location.href = 'login.html';
+        }
+    });
+</script>
+</body>
+</html>
