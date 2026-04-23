@@ -6,6 +6,29 @@
     <title>Admin Panel • SocialNest</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+    /* Add these to any page that's not fitting */
+html, body {
+width: 100%;
+overflow-x: hidden;
+}
+
+* {
+max-width: 100%;
+box-sizing: border-box;
+}
+
+img, video, iframe {
+max-width: 100%;
+height: auto;
+}
+
+@media (max-width: 768px) {
+.container {
+padding-left: 12px;
+padding-right: 12px;
+}
+}
+    
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); min-height: 100vh; padding: 20px; }
         .container { max-width: 1400px; margin: 0 auto; }
@@ -69,6 +92,7 @@
     <div class="header">
         <h1><i class="fas fa-shield-alt"></i> Admin Panel <span class="admin-badge">ADMIN-BASE</span></h1>
         <button class="logout-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-arrow-left"></i> Back to Dashboard</button>
+        <button class="logout-btn" onclick="window.location.href='debug-clear.html'"><i class="fas fa-arrow-right"></i> user db</button>
     </div>
     
     <div class="stats">

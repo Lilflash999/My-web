@@ -4,7 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Debug Tool • Clear User Data</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* Add these to any page that's not fitting */
+html, body {
+width: 100%;
+overflow-x: hidden;
+}
+
+* {
+max-width: 100%;
+box-sizing: border-box;
+}
+
+img, video, iframe {
+max-width: 100%;
+height: auto;
+}
+
+@media (max-width: 768px) {
+.container {
+padding-left: 12px;
+padding-right: 12px;
+}
+}
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,7 +36,7 @@
             font-family: 'Segoe UI', sans-serif;
         }
         body {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -89,6 +113,7 @@
             font-size: 12px;
             max-height: 300px;
             overflow-y: auto;
+            display: none;
         }
         .success {
             background: #d1fae5;
@@ -112,9 +137,196 @@
             transition: 0.2s;
             font-size: 14px;
         }
+        
+        /* Searchable Select Styles */
+        .searchable-select {
+            position: relative;
+            width: 100%;
+        }
+        
+        .select-button {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .select-button:hover {
+            border-color: #667eea;
+        }
+        
+        .select-button.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .select-button::after {
+            content: '▼';
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .select-button.active::after {
+            transform: rotate(180deg);
+        }
+        
+        .select-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 8px;
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .select-dropdown.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-bottom: 1px solid #e2e8f0;
+            outline: none;
+            font-size: 14px;
+        }
+        
+        .search-box:focus {
+            background: #f8fafc;
+        }
+        
+        .options-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .option-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .option-item:hover {
+            background: #f1f5f9;
+        }
+        
+        .option-item.selected {
+            background: #ede9fe;
+            color: #667eea;
+        }
+        
+        .option-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .option-info {
+            flex: 1;
+        }
+        
+        .option-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
+        }
+        
+        .option-username {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+        
+        .selected-user-info {
+            margin-top: 12px;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .selected-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .selected-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1e293b;
+        }
+        
+        .selected-username {
+            font-size: 11px;
+            color: #64748b;
+        }
+        
+        .main-btn {
+            position: fixed;
+        }
+        
+        .main-btn i {
+            color: black;
+            font-size: 30px;
+            transition: transform 0.3s ease;
+        }
+        .main-btn:hover i {
+            transform: translateX(-5px);
+        }
     </style>
 </head>
 <body>
+
+        <div class="main-btn">
+            <button onclick="window.location.href='admin-users.html'" style=" background: transparent; border: none; cursor: pointer; width: 100%; height: 100%;"><i class="fas fa-arrow-left fa-fw"></i></button>
+        </div>
+        
 <div class="container">
     <div class="card">
         <h1>🔧 Debug Tool</h1>
@@ -126,8 +338,27 @@
         </div>
         
         <div class="input-group">
-            <label>👤 User ID to clear:</label>
-            <input type="text" id="userId" placeholder="Enter Firebase User ID" value="">
+            <label>👤 Select User:</label>
+            <div class="searchable-select">
+                <div class="select-button" id="selectButton">
+                    <em id="selectedDisplay">select user...</em>
+                </div>
+                <div class="select-dropdown" id="selectDropdown">
+                    <input type="text" class="search-box" id="searchInput" placeholder="Search by name or username...">
+                    <div class="options-list" id="optionsList">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i> Loading users...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="selected-user-info" id="selectedUserInfo" style="display: none;">
+                <img id="selectedAvatar" class="selected-avatar" src="">
+                <div>
+                    <div class="selected-name" id="selectedName"></div>
+                    <div class="selected-username" id="selectedUsername"></div>
+                </div>
+            </div>
         </div>
         
         <div class="input-group">
@@ -145,14 +376,14 @@
         <button id="clearAllUsersBtn" class="warning" style="margin-top: 12px;">⚠️ Clear ALL Users Data (Admin Only)</button>
     </div>
     
-    <div id="result" class="result" style="display: none;"></div>
+    <div id="result" class="result"></div>
 </div>
 <div id="toast" class="toast"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, remove, get, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getDatabase, ref, remove, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     
     const firebaseConfig = {
         apiKey: "AIzaSyCDrwe_zHHoXDeKZBiKBjoXWkyVCZGoPps",
@@ -169,6 +400,20 @@
     const auth = getAuth(app);
     
     const ADMIN_UID = "6JkPCRetiCOX65opu4ofqAiTXaY2";
+    let currentUser = null;
+    let allUsers = [];
+    let selectedUserId = null;
+    
+    // DOM Elements
+    const selectButton = document.getElementById('selectButton');
+    const selectDropdown = document.getElementById('selectDropdown');
+    const searchInput = document.getElementById('searchInput');
+    const optionsList = document.getElementById('optionsList');
+    const selectedUserInfo = document.getElementById('selectedUserInfo');
+    const selectedDisplay = document.getElementById('selectedDisplay');
+    const selectedAvatar = document.getElementById('selectedAvatar');
+    const selectedName = document.getElementById('selectedName');
+    const selectedUsername = document.getElementById('selectedUsername');
     
     function showToast(msg, isError = false) {
         const t = document.getElementById('toast');
@@ -177,6 +422,115 @@
         t.style.opacity = '1';
         setTimeout(() => t.style.opacity = '0', 3000);
     }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+    }
+    
+    // Fetch all users
+    async function fetchAllUsers() {
+        try {
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            const users = snapshot.val() || {};
+            
+            allUsers = [];
+            for (const [uid, user] of Object.entries(users)) {
+                allUsers.push({
+                    uid: uid,
+                    displayName: user.displayName || user.username || 'Unknown User',
+                    username: user.username || 'user',
+                    profilePic: user.profilePic || `https://ui-avatars.com/api/?background=667eea&color=fff&name=${encodeURIComponent(user.displayName || 'U')}`,
+                    bio: user.bio || ''
+                });
+            }
+            
+            allUsers.sort((a, b) => a.displayName.localeCompare(b.displayName));
+            renderOptions('');
+            return allUsers;
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            optionsList.innerHTML = '<div class="no-results">Error loading users</div>';
+            return [];
+        }
+    }
+    
+    // Render options
+    function renderOptions(searchTerm = '') {
+        if (allUsers.length === 0) {
+            optionsList.innerHTML = '<div class="loading-spinner">No users found</div>';
+            return;
+        }
+        
+        const filteredUsers = allUsers.filter(user => 
+            user.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.username.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        if (filteredUsers.length === 0) {
+            optionsList.innerHTML = '<div class="no-results">No users match your search</div>';
+            return;
+        }
+        
+        optionsList.innerHTML = filteredUsers.map(user => `
+            <div class="option-item" data-uid="${user.uid}" data-name="${escapeHtml(user.displayName)}" data-username="${escapeHtml(user.username)}" data-avatar="${user.profilePic}">
+                <img class="option-avatar" src="${user.profilePic}" onerror="this.src='https://ui-avatars.com/api/?background=667eea&color=fff'">
+                <div class="option-info">
+                    <div class="option-name">${escapeHtml(user.displayName)}</div>
+                    <div class="option-username">@${escapeHtml(user.username)}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        // Add click listeners
+        document.querySelectorAll('.option-item').forEach(option => {
+            option.addEventListener('click', () => {
+                const uid = option.dataset.uid;
+                const name = option.dataset.name;
+                const username = option.dataset.username;
+                const avatar = option.dataset.avatar;
+                selectUser(uid, name, username, avatar);
+            });
+        });
+    }
+    
+    // Select a user
+    function selectUser(uid, name, username, avatar) {
+        selectedUserId = uid;
+        selectedDisplay.innerHTML = `<strong>${escapeHtml(name)}</strong> @${escapeHtml(username)}`;
+        selectedAvatar.src = avatar;
+        selectedName.textContent = name;
+        selectedUsername.textContent = `@${username}`;
+        selectedUserInfo.style.display = 'flex';
+        selectDropdown.classList.remove('show');
+        selectButton.classList.remove('active');
+    }
+    
+    // Toggle dropdown
+    selectButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectDropdown.classList.toggle('show');
+        selectButton.classList.toggle('active');
+        if (selectDropdown.classList.contains('show')) {
+            searchInput.focus();
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!selectButton.contains(e.target) && !selectDropdown.contains(e.target)) {
+            selectDropdown.classList.remove('show');
+            selectButton.classList.remove('active');
+        }
+    });
+    
+    // Search filter
+    searchInput.addEventListener('input', (e) => {
+        renderOptions(e.target.value);
+    });
+    
+    // ========== CLEAR FUNCTIONS ==========
     
     async function clearUserChats(userId) {
         const messagesRef = ref(db, 'messages');
@@ -194,11 +548,9 @@
     }
     
     async function clearUserFriendsAndRequests(userId) {
-        // Clear user's own friends and requests
         await remove(ref(db, `users/${userId}/friends`));
         await remove(ref(db, `users/${userId}/friendRequests`));
         
-        // Also remove this user from other users' friends and requests
         const usersRef = ref(db, 'users');
         const snapshot = await get(usersRef);
         const users = snapshot.val() || {};
@@ -207,7 +559,6 @@
         for (const [otherId, otherUser] of Object.entries(users)) {
             let updated = false;
             
-            // Remove from other users' friends
             if (otherUser.friends && otherUser.friends.includes(userId)) {
                 const newFriends = otherUser.friends.filter(id => id !== userId);
                 await remove(ref(db, `users/${otherId}/friends`));
@@ -217,7 +568,6 @@
                 updated = true;
             }
             
-            // Remove from other users' friendRequests
             if (otherUser.friendRequests && otherUser.friendRequests.includes(userId)) {
                 const newRequests = otherUser.friendRequests.filter(id => id !== userId);
                 await remove(ref(db, `users/${otherId}/friendRequests`));
@@ -283,7 +633,7 @@
         const resultDiv = document.getElementById('result');
         resultDiv.style.display = 'block';
         
-        let html = `<strong>✅ Results for user: ${userId}</strong><br><br>`;
+        let html = `<strong>✅ Results for user: ${userId.substring(0,12)}...</strong><br><br>`;
         html += `<div style="margin-top: 10px;">`;
         
         if (results.chats !== undefined) {
@@ -305,19 +655,18 @@
         
         setTimeout(() => {
             resultDiv.classList.remove('success');
-        }, 3000);
+        }, 5000);
     }
     
     document.getElementById('clearBtn').addEventListener('click', async () => {
-        const userId = document.getElementById('userId').value.trim();
-        const clearType = document.getElementById('clearType').value;
-        
-        if (!userId) {
-            showToast("Please enter a User ID", true);
+        if (!selectedUserId) {
+            showToast("Please select a user first", true);
             return;
         }
         
-        if (!confirm(`⚠️ Are you sure you want to clear ${clearType} for user ${userId}? This cannot be undone!`)) {
+        const clearType = document.getElementById('clearType').value;
+        
+        if (!confirm(`⚠️ Are you sure you want to clear ${clearType} for user ${selectedUserId.substring(0,12)}...? This cannot be undone!`)) {
             return;
         }
         
@@ -326,32 +675,32 @@
             
             switch(clearType) {
                 case 'all':
-                    results = await clearAllUserData(userId);
-                    showToast(`✅ Cleared all data for user ${userId.substring(0,8)}...`);
+                    results = await clearAllUserData(selectedUserId);
+                    showToast(`✅ Cleared all data for user`);
                     break;
                 case 'chats':
-                    const chatsCount = await clearUserChats(userId);
+                    const chatsCount = await clearUserChats(selectedUserId);
                     results = { chats: chatsCount };
                     showToast(`✅ Cleared ${chatsCount} chat(s) for user`);
                     break;
                 case 'friends':
-                    const friendsCount = await clearUserFriendsAndRequests(userId);
-                    results = { friends: friendsCount };
+                    await clearUserFriendsAndRequests(selectedUserId);
+                    results = { friends: true };
                     showToast(`✅ Cleared friends and requests`);
                     break;
                 case 'posts':
-                    const postsCount = await clearUserPosts(userId);
+                    const postsCount = await clearUserPosts(selectedUserId);
                     results = { posts: postsCount };
                     showToast(`✅ Cleared ${postsCount} post(s)`);
                     break;
                 case 'notifications':
-                    await clearUserNotifications(userId);
+                    await clearUserNotifications(selectedUserId);
                     results = { notifications: true };
                     showToast(`✅ Cleared notifications`);
                     break;
             }
             
-            displayResult(results, userId);
+            displayResult(results, selectedUserId);
             
         } catch (error) {
             console.error("Clear error:", error);
@@ -360,6 +709,11 @@
     });
     
     document.getElementById('clearAllUsersBtn').addEventListener('click', async () => {
+        if (currentUser?.uid !== ADMIN_UID) {
+            showToast("Admin access required", true);
+            return;
+        }
+        
         if (!confirm("⚠️⚠️⚠️ DANGER: This will clear ALL user data (chats, friends, posts) for ALL users except admin. This is IRREVERSIBLE! Type 'CONFIRM' to proceed.")) {
             return;
         }
@@ -389,14 +743,19 @@
         }
     });
     
-    // Auto-fill current user if logged in
+    // Initialize
     onAuthStateChanged(auth, async (user) => {
         if (user) {
-            document.getElementById('userId').value = user.uid;
+            currentUser = user;
+            await fetchAllUsers();
+            
             if (user.uid !== ADMIN_UID) {
-                document.getElementById('clearAllUsersBtn').disabled = true;
-                document.getElementById('clearAllUsersBtn').title = "Admin only";
+                const clearAllBtn = document.getElementById('clearAllUsersBtn');
+                clearAllBtn.disabled = true;
+                clearAllBtn.title = "Admin only";
             }
+        } else {
+            window.location.href = 'login.html';
         }
     });
 </script>
